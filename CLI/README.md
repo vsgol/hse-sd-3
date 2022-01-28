@@ -80,8 +80,9 @@ r'''^((\\.)|[^\\"'])+|("((\\.)|[^\\"])*")|('((\\.)|[^\\'])*')'''
 
 ```python
 
-STRING = r'''(\"[^"]*\")|(\'[^']*\')'''
-WORD = r'''^[a-zA-Z_][a-zA-Z_0-9]*$'''
+STRING_IN_QUOTES = r'''("((\\.)|[^\\"])*")|('((\\.)|[^\\'])*')'''
+WORD = r'''$[a-zA-Z_][a-zA-Z_0-9]*$'''
+STRING = r'''$((\\')|(\\")|[^\s'"|])+$'''
 PIPE = '|'
 EQUAL = '='
 ```
@@ -92,7 +93,8 @@ EQUAL = '='
 <summary>Грамматика парсера:</summary>
 
 ```
-value : STRING
+value : STRING_IN_QUOTES
+      | STRING
       | WORD
 
 value_sequence : value
