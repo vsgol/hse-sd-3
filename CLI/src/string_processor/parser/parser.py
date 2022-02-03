@@ -42,9 +42,9 @@ class Parser:
         """function_call : STRING value_sequence
                          | STRING"""
         if len(p) == 3:
-            p[0] = CommandFactory.tokensToCommands(p[1], p[2])
+            p[0] = CommandFactory.tokens_to_commands(p[1], p[2])
         else:
-            p[0] = CommandFactory.tokensToCommands(p[1], [])
+            p[0] = CommandFactory.tokens_to_commands(p[1], [])
 
     def p_command(self, p):
         """command : declaration
