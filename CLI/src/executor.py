@@ -31,14 +31,13 @@ class Executor:
             outputs.append(command.get_stdout())
             errors.append(command.get_stderr())
         # Remove empty strings
-        outputs = list(filter(len, outputs))
         errors = list(filter(len, errors))
-        return '\n'.join(outputs), '\n'.join(errors)
+        return outputs[-1] if len(outputs) > 0 else '', '\n'.join(errors)
 
     def is_shell_terminated(self):
-        """Indicated whether application must be terminated
-        Args:
-            pipe: target sequence of commands to be executed
-            memory: environments variables
-        """
+        """Indicated whether application must be terminated"""
         return self.is_terminated
+
+    def get_last_return_code(self):
+        """Returns last executed command exit code """
+        return self.last_return_code
