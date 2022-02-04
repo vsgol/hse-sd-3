@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from typing import List, Dict
 from .lexer import Lexer
 
-from .command import CommandFactory, Command, DeclCommand
+from .command import CommandFactory, Command, DeclareCommand
 
 
 class IncompleteToken(Exception):
@@ -18,13 +18,14 @@ class Parser:
         self.lexer = Lexer()
         self.memory = None
         self.parser = make_parser(self)
+        self.factory = CommandFactory()
 
     tokens = Lexer.tokens
 
     # ==> Defining the context-free grammar specifications
     def p_declaration(self, p):
         """declaration : STRING EQUAL value"""
-        p[0] = DeclCommand(p[1], p[2], self.memory)
+        p[0] = self.factory.build_declare_command(p[1], p[2])
 
     def p_value_sequence(self, p):
         """value_sequence : value value_sequence
@@ -42,9 +43,9 @@ class Parser:
         """function_call : STRING value_sequence
                          | STRING"""
         if len(p) == 3:
-            p[0] = CommandFactory.tokensToCommands(p[1], p[2])
+            p[0] = self.factory.tokens_to_commands(p[1], p[2])
         else:
-            p[0] = CommandFactory.tokensToCommands(p[1], [])
+            p[0] = self.factory.tokens_to_commands(p[1], [])
 
     def p_command(self, p):
         """command : declaration
