@@ -1,5 +1,4 @@
 import os
-from typing import List, Dict
 import subprocess
 
 SUCCESS_RETURN_CODE = 0
@@ -8,35 +7,82 @@ OTHER_RETURN_CODE = 255
 
 
 class Command:
+    """Abstract command class
+    Attributes:
+        return_code: command return code
+        stdout: command output to stdout
+        stderr: command output to stderr
+    """
     def __init__(self):
+        """Inits Command attributes with Nones"""
         self.return_code = None
         self.stdout = None
         self.stderr = None
 
     def execute(self, inp: str, memory=None):
+        """Execution virtual function
+        Args:
+            inp: Previous command output
+            memory: environment variables
+        Raises:
+            NotImplementedError: method is not overrided or call for abstract command execution
+        """
         raise NotImplementedError('execute method is not implemented')
 
     def get_return_code(self):
+        """Returns command return code
+        Returns:
+            Command exit code if command was executed
+        Raises:
+            RuntimeError: method was called before command execution
+        """
         if self.return_code is None:
             raise RuntimeError('Asking for return code before command execution')
         return self.return_code
 
     def get_stdout(self):
+        """Returns command stdout if command was executed
+        Returns:
+            Command stdout if command was executed
+        Raises:
+            RuntimeError: method was called before command execution
+        """
         if self.stdout is None:
             raise RuntimeError('Asking for stdout before command execution')
         return self.stdout
 
     def get_stderr(self):
+        """Returns command stderr if command was executed
+        Returns:
+            Command stderr if command was executed
+        Raises:
+            RuntimeError: method was called before command execution
+        """
         if self.stderr is None:
             raise RuntimeError('Asking for stderr before command execution')
         return self.stderr
 
     def is_exit(self):
+        """Returns whether command was an exit command
+        Returns:
+            Whether command is an 'exit' command
+        """
         return False
 
 
 class DeclareCommand(Command):
+    """Variable value assignment command class
+    Attributes:
+        variable: target variable name
+        value: target variable new value
+    """
     def __init__(self, args):
+        """Inits DeclareCommand attributes with values from provided arguments
+        Args:
+            args: Expected to contain two values. First is considered as variable name second as variable new value
+        Raises:
+            ValueError: received more or less than two arguments
+        """
         super().__init__()
         if len(args) != 2:
             raise ValueError('Declare command must receive exactly 2 arguments')
@@ -44,6 +90,15 @@ class DeclareCommand(Command):
         self.value = args[1]
 
     def execute(self, inp: str, memory=None):
+        """Assigns new value for variable
+        Args:
+            inp: Previous command output, ignored
+            memory: environment variables
+        Returns:
+            Exit code value
+        Raises:
+            ValueError: environment was not provided
+        """
         if memory is None:
             raise ValueError('Did not get memory reference for DeclareCommand execution')
         memory.set_value(self.variable, self.value)
@@ -54,6 +109,12 @@ class DeclareCommand(Command):
 
 
 def get_file_bytes(file_name):
+    """Reads bytes from file
+    Args:
+        file_name: target file name
+    Returns:
+        Tuple of read bytes, error message and exit code
+    """
     bs = b''
     stderr = ''
     return_code = SUCCESS_RETURN_CODE
@@ -78,11 +139,26 @@ def get_file_bytes(file_name):
 
 
 class CatCommand(Command):
+    """'cat' command class
+    Attributes:
+        file_name: target file name
+    """
     def __init__(self, args):
+        """Inits CatCommand file_name if provided
+        Args:
+            args: Optionally contains target file as first element of the list
+        """
         super().__init__()
         self.file_name = args[0] if len(args) > 0 else None
 
     def execute(self, inp: str, memory=None):
+        """Reads file content and outputs it's content
+        Args:
+            inp: Previous command output, if target file is not provided than outputs this value
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
         self.stdout = ''
         self.stderr = ''
         if self.file_name is None:
@@ -96,11 +172,26 @@ class CatCommand(Command):
 
 
 class EchoCommand(Command):
+    """'echo' command class
+    Attributes:
+        args: strings to output
+    """
     def __init__(self, args):
+        """Inits EchoCommand args
+        Args:
+            args: Contains strings for output
+        """
         super().__init__()
         self.args = args
 
     def execute(self, inp: str, memory=None):
+        """Outputs command's arguments separated with space
+        Args:
+            inp: Previous command output, ignored
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
         self.stdout = ' '.join(self.args)
         self.stderr = ''
         self.return_code = SUCCESS_RETURN_CODE
@@ -108,11 +199,26 @@ class EchoCommand(Command):
 
 
 class WcCommand(Command):
+    """'wc' command class
+    Attributes:
+        file_name: target file name
+    """
     def __init__(self, args):
+        """Inits WcCommand file_name if provided
+        Args:
+            args: Optionally contains target file as first element of the list
+        """
         super().__init__()
         self.file_name = args[0] if len(args) > 0 else None
 
     def execute(self, inp: str, memory=None):
+        """Reads file content and outputs it's number of lines, words and bytes
+        Args:
+            inp: Previous command output, if target file is not provided than outputs statistics for this value
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
         self.stdout = ''
         self.stderr = ''
         if self.file_name is None:
@@ -132,10 +238,22 @@ class WcCommand(Command):
 
 
 class PwdCommand(Command):
+    """'pwd' command class"""
     def __init__(self, args):
+        """Inits PwdCommand
+        Args:
+            args: ignored
+        """
         super().__init__()
 
     def execute(self, inp: str, memory=None):
+        """Outputs current working directory
+        Args:
+            inp: Previous command output, ignored
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
         self.stdout = os.path.abspath(os.getcwd())
         self.stderr = ''
         self.return_code = SUCCESS_RETURN_CODE
@@ -143,25 +261,56 @@ class PwdCommand(Command):
 
 
 class ExitCommand(Command):
+    """'exit' command class"""
     def __init__(self, args):
+        """Inits PwdCommand
+        Args:
+            args: ignored
+        """
         super().__init__()
 
     def execute(self, inp: str, memory=None):
+        """No effect
+        Args:
+            inp: Previous command output, ignored
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
         self.stdout = ''
         self.stderr = ''
         self.return_code = SUCCESS_RETURN_CODE
         return self.return_code
 
     def is_exit(self):
+        """Signals that the command is 'exit'"""
         return True
 
 
 class OtherCommand(Command):
+    """Any other command class"""
     def __init__(self, args):
+        """Inits OtherCommand arguments
+        Attributes:
+            args: arguments for calling command
+        Raises:
+            ValueError: trying to create command without command name
+        """
         super().__init__()
+        if len(args) == 0:
+            raise ValueError('At least command name must be provided as argument for OtherCommand')
         self.args = args
 
     def execute(self, inp: str, memory=None):
+        """Executes outer command with provided environment
+        Args:
+            inp: Previous command output, used as input
+            memory: environment variables, used during call
+        Returns:
+            Exit code value
+        Raises:
+            ValueError: environment was not provided
+        """
         if memory is None:
             raise ValueError('Did not get memory reference for OtherCommand execution')
         out = subprocess.Popen(self.args + [inp],
