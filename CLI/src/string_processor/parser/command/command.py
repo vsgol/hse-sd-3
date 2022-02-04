@@ -223,16 +223,19 @@ class WcCommand(Command):
         self.stderr = ''
         if self.file_name is None:
             self.return_code = SUCCESS_RETURN_CODE
+            n_bytes = len(inp.encode('utf-8'))
             string = inp
-            n_bytes = len(string)
         else:
             bs, self.stderr, self.return_code = get_file_bytes(self.file_name)
             if self.return_code != SUCCESS_RETURN_CODE:
                 return self.return_code
             n_bytes = len(bs)
             string = bs.decode('utf-8')
-        n_words = len(string.split())
-        n_lines = len(string.split('\n'))
+        if n_bytes == 0:
+            n_words, n_lines = 0, 0
+        else:
+            n_words = len(string.split())
+            n_lines = len(string.split('\n'))
         self.stdout = '{:6d} {:6d} {:6d}'.format(n_lines, n_words, n_bytes)
         return self.return_code
 
@@ -313,11 +316,13 @@ class OtherCommand(Command):
         """
         if memory is None:
             raise ValueError('Did not get memory reference for OtherCommand execution')
-        out = subprocess.Popen(self.args + [inp],
+
+        out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT,
-                               env=memory.get_env())
+                               env=memory.get_env(), shell=True)
         self.stdout, self.stderr = out.communicate()
+
         if self.stdout is None:
             self.stdout = ''
         else:
