@@ -12,7 +12,8 @@ class Executor:
             last_return_code: last executed command return code
         """
         self.is_terminated = False
-        self.last_return_code = None
+        # Currently unused
+        # self.last_return_code = None
 
     def execute(self, pipe: List[Command], memory):
         """Executes the sequence of commands
@@ -38,6 +39,6 @@ class Executor:
         """Indicated whether application must be terminated"""
         return self.is_terminated
 
-    def get_last_return_code(self):
-        """Returns last executed command exit code """
-        return self.last_return_code
+    # def get_last_return_code(self):
+    #     """Returns last executed command exit code """
+    #     return self.last_return_code
