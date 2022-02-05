@@ -320,7 +320,7 @@ class OtherCommand(Command):
         out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT,
-                               env=memory.get_env(), shell=True)
+                               env=memory.get_env(), shell=(os.name == 'nt'))
         self.stdout, self.stderr = out.communicate()
 
         if self.stdout is None:
