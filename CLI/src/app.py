@@ -1,8 +1,8 @@
-from CLI.src.string_processor.string_processor import StringProcessor
-from CLI.src.executor import Executor
-from CLI.src.reader import Reader
-from CLI.src.writer import Writer
-from CLI.src.memory import Memory
+from string_processor.string_processor import StringProcessor
+from executor import Executor
+from reader import Reader
+from writer import Writer
+from memory import Memory
 
 
 class MainApp:
@@ -29,8 +29,8 @@ class MainApp:
             if self.executor.is_shell_terminated():
                 break
             input_line = self.reader.get_line()
-            commands = self.string_processor.process(input_line)
-            stdout, stderr = self.executor.execute(commands, memory)
+            commands = self.string_processor.process(input_line, self.memory)
+            stdout, stderr = self.executor.execute(commands, self.memory)
             self.writer.print_outputs(stdout, stderr)
 
 

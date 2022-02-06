@@ -20,7 +20,7 @@ def substitute(input_string: str, memory: dict) -> str:
         new_pos = pos + len(substring[0])
         if substring[0] != "'":
             try:
-                substring = Template(substring[0]).substitute(memory)
+                substring = Template(substring[0]).substitute(memory.get_env())
             except ValueError as err:
                 print(f'ValueError {err!s}')
             except KeyError as err:
