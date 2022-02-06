@@ -9,11 +9,11 @@ class MainApp:
     """Responsible for linking the application components and interacting with the user
 
         Attributes:
-            reader:
-            writer:
-            memory:
-            string_processor:
-            executor:
+            reader: reads user input
+            writer: writes result of execution
+            memory: stores environmental variables
+            string_processor: converts input to commands
+            executor: executes commands
     """
 
     def __init__(self):
