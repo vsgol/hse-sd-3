@@ -15,7 +15,7 @@ class Memory:
             Returns:
                 A string value for variable if exists. Otherwise returns ''
         """
-        return self.data.get(name, '')
+        return self.data.get(key, '')
 
     def set_value(self, key, value):
         """Sets value for key
@@ -24,7 +24,7 @@ class Memory:
                 key: A str for variable name
                 value: A str for new value of variable
         """
-        self.data[name] = value
+        self.data[key] = value
 
     def get_env(self):
         """Gets all variables values

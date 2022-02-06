@@ -1,5 +1,5 @@
-from CLI.src.plug import StringProcessor
-from CLI.src.plug import Executor
+from CLI.src.string_processor.string_processor import StringProcessor
+from CLI.src.executor import Executor
 from CLI.src.reader import Reader
 from CLI.src.writer import Writer
 from CLI.src.memory import Memory
@@ -32,3 +32,7 @@ class MainApp:
             commands = self.string_processor.process(input_line)
             stdout, stderr = self.executor.execute(commands, memory)
             self.writer.print_outputs(stdout, stderr)
+
+
+if __name__ == '__main__':
+    MainApp().start()
