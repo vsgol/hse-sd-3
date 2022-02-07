@@ -45,7 +45,7 @@ class TestApp(unittest.TestCase):
     def test_echo(self):
         inp = ['echo "Some text"', 'exit']
         out = '\n'.join([
-            format_out('"Some text"', ''),
+            format_out('Some text', ''),
             format_out('', ''),
             ])
         self.run_pipe(inp, out)
@@ -53,7 +53,7 @@ class TestApp(unittest.TestCase):
     def test_env_vars(self):
         inp = ['echo "$USER $HOME"', 'exit']
         out = '\n'.join([
-            format_out(f'"{os.environ["USER"]} {os.environ["HOME"]}"', ''),
+            format_out(f'{os.environ["USER"]} {os.environ["HOME"]}', ''),
             format_out('', ''),
             ])
         self.run_pipe(inp, out)
@@ -63,21 +63,9 @@ class TestApp(unittest.TestCase):
         inp = [f'echo "${var}"', f'{var}=10', f'echo "${var}"', 'exit']
         #print(inp)
         out = '\n'.join([
-            format_out('""', ''),
             format_out('', ''),
-            format_out('"10"', ''),
             format_out('', ''),
-            ])
-        self.run_pipe(inp, out)
-
-    def test_variable_assign(self):
-        var = 'my_cool_variable_which_is_not_in_system'
-        inp = [f'echo "${var}"', f'{var}=10', f'echo "${var}"', 'exit']
-        #print(inp)
-        out = '\n'.join([
-            format_out('""', ''),
-            format_out('', ''),
-            format_out('"10"', ''),
+            format_out('10', ''),
             format_out('', ''),
             ])
         self.run_pipe(inp, out)
