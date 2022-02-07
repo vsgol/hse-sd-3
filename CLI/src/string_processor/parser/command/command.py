@@ -317,10 +317,17 @@ class OtherCommand(Command):
         if memory is None:
             raise ValueError('Did not get memory reference for OtherCommand execution')
 
-        out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT,
-                               env=memory.get_env(), shell=(os.name == 'nt'))
+        try:
+            out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT,
+                                   env=memory.get_env(), shell=(os.name == 'nt'))
+        except Exception as e:
+            self.stdout = ''
+            self.stderr = str(e)
+            self.return_code = OTHER_RETURN_CODE
+            return self.return_code
+
         self.stdout, self.stderr = out.communicate()
 
         if self.stdout is None:

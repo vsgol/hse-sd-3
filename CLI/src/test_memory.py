@@ -1,6 +1,7 @@
-from .memory import Memory
-
 import unittest
+import os
+
+from .memory import Memory
 
 
 class TestMemory(unittest.TestCase):
@@ -29,8 +30,9 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(mem.get_value(var1), new_val1)
         mem.set_value(var1, new_val2)
         self.assertEqual(mem.get_value(var1), new_val2)
-
-        self.assertDictEqual({var1: new_val2, var2: val2, var3: val3}, mem.get_env())
+        expected = dict(os.environ)
+        expected.update({var1: new_val2, var2: val2, var3: val3})
+        self.assertDictEqual(expected, mem.get_env())
 
 if __name__ == '__main__':
     unittest.main()
