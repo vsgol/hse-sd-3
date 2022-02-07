@@ -13,7 +13,7 @@ def substitute(input_string: str, memory: dict) -> str:
     :return: Substitution result
     """
 
-    pattern = re.compile("""((\\.)|[^\\"'])+|("((\\.)|[^"])*")|('((\\.)|[^\\'])*')""")
+    pattern = re.compile("""((\\\.)|[^"'\\\])+|("((\\\.)|[^"])*")|('((\\\.)|[^'\\\])*')""")
     pos = 0
     res = []
     for substring in pattern.finditer(input_string):

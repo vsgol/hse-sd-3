@@ -25,7 +25,7 @@ class Parser:
     # ==> Defining the context-free grammar specifications
     def p_declaration(self, p):
         """declaration : STRING EQUAL value"""
-        p[0] = self.factory.build_declare_command(p[1], p[2])
+        p[0] = self.factory.build_declare_command(p[1], p[3])
 
     def p_value_sequence(self, p):
         """value_sequence : value value_sequence
