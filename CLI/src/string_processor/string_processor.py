@@ -12,4 +12,4 @@ class StringProcessor:
 
     def process(self, code: str, memory: Dict[str, str]) -> List[Command]:
         code = substitute(code, memory)
-        return self.parser.parse(code, memory)
+        return self.parser.parse(code)
