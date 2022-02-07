@@ -1,3 +1,6 @@
+import os
+
+
 class Memory:
     """Responsible for storing environment variables
 
@@ -5,7 +8,7 @@ class Memory:
             data: A dict storing environment variables
     """
     def __init__(self):
-        self.data = {}
+        self.data = dict(os.environ)
 
     def get_value(self, key):
         """Gets value for key
