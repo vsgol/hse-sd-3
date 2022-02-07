@@ -70,6 +70,18 @@ class TestApp(unittest.TestCase):
             ])
         self.run_pipe(inp, out)
 
+    def test_variable_assign(self):
+        var = 'my_cool_variable_which_is_not_in_system'
+        inp = [f'echo "${var}"', f'{var}=10', f'echo "${var}"', 'exit']
+        #print(inp)
+        out = '\n'.join([
+            format_out('""', ''),
+            format_out('', ''),
+            format_out('"10"', ''),
+            format_out('', ''),
+            ])
+        self.run_pipe(inp, out)
+
 
 if __name__ == '__main__':
     unittest.main()
