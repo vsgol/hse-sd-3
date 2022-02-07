@@ -44,7 +44,7 @@ class Lexer:
     @staticmethod
     def t_STRING_IN_QUOTES(t):
         r"""("((\\.)|[^\\"])*")|('((\\.)|[^\\'])*')"""
-        if t[0] == '"':
+        if t.value[0] == '"':
             t.value = t.value[1:-1]
             t.value = re.subn('''\\\(?P<char>["\\\])''', '''\g<char>''', t.value)[0]
         else:
