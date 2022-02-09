@@ -3,8 +3,10 @@
 import re
 from string import Template
 
+from cli_module.memory import Memory
 
-def substitute(input_string: str, memory: dict) -> str:
+
+def substitute(input_string: str, memory: Memory) -> str:
     """
     selects substrings in quotes in the input string and substitutes variables if they are not in single quotes
 

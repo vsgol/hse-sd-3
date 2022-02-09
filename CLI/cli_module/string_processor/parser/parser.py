@@ -1,8 +1,9 @@
-import ply.yacc as yacc
-from typing import List, Dict
-from .lexer import Lexer
+from typing import List
 
-from .command import CommandFactory, Command, DeclareCommand
+import ply.yacc as yacc
+
+from .command import CommandFactory, Command
+from .lexer import Lexer
 
 
 class IncompleteToken(Exception):
@@ -10,13 +11,12 @@ class IncompleteToken(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(''.format(self.value))
+        return repr(self.value)
 
 
 class Parser:
     def __init__(self):
         self.lexer = Lexer()
-        self.memory = None
         self.parser = make_parser(self)
         self.factory = CommandFactory()
 
@@ -63,8 +63,7 @@ class Parser:
     def p_error(self, p):
         raise IncompleteToken(p)
 
-    def parse(self, code: str, memory: Dict[str, str]) -> List[Command]:
-        self.memory = memory
+    def parse(self, code: str) -> List[Command]:
         return self.parser.parse(code, self.lexer)
 
 

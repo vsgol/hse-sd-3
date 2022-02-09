@@ -49,6 +49,7 @@ class Lexer:
             t.value = re.subn('''\\\(?P<char>["\\\])''', '''\g<char>''', t.value)[0]
         else:
             t.value = t.value[1:-1]
+        return t
 
     @staticmethod
     def t_newline(t):

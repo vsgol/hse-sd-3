@@ -1,6 +1,6 @@
 from typing import List
 
-from string_processor.parser.command.command import Command
+from .string_processor.parser.command.command import Command
 
 
 class Executor:
