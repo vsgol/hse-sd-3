@@ -1,8 +1,8 @@
-from string_processor.string_processor import StringProcessor
-from executor import Executor
-from reader import Reader
-from writer import Writer
-from memory import Memory
+from cli_module.string_processor.string_processor import StringProcessor
+from cli_module.executor import Executor
+from cli_module.reader import Reader
+from cli_module.writer import Writer
+from cli_module.memory import Memory
 
 
 class MainApp:

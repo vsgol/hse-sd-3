@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-from .app import MainApp
+from app import MainApp
 
 
 def format_out(out, err):
@@ -51,17 +51,25 @@ class TestApp(unittest.TestCase):
         self.run_pipe(inp, out)
 
     def test_env_vars(self):
-        inp = ['echo "$USER $HOME"', 'exit']
-        out = '\n'.join([
-            format_out(f'{os.environ["USER"]} {os.environ["HOME"]}', ''),
-            format_out('', ''),
+        if os.name != 'nt':
+            inp = ['echo "$USER $HOME"', 'exit']
+            out = '\n'.join([
+                format_out(f'{os.environ["USER"]} {os.environ["HOME"]}', ''),
+                format_out('', ''),
+                ])
+            self.run_pipe(inp, out)
+        else:
+            inp = ['echo "$WINDIR"', 'exit']
+            out = '\n'.join([
+                format_out(f'{os.environ["WINDIR"]}', ''),
+                format_out('', ''),
             ])
-        self.run_pipe(inp, out)
+            self.run_pipe(inp, out)
 
     def test_variable_assign(self):
         var = 'my_cool_variable_which_is_not_in_system'
         inp = [f'echo "${var}"', f'{var}=10', f'echo "${var}"', 'exit']
-        #print(inp)
+
         out = '\n'.join([
             format_out('', ''),
             format_out('', ''),

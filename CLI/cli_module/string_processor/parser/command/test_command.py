@@ -241,9 +241,7 @@ class TestCommands(unittest.TestCase):
             cmd.execute('')
         cmd.execute('!', mem)
         if os.name == 'nt':
-            self.assertEqual(cmd.get_stdout(), 'hello world !\r\n')
-        else:
-            self.assertEqual(cmd.get_stdout(), 'hello world !\n')
+            self.assertEqual(cmd.get_stdout(), 'hello world !' + os.linesep)
         self.assertEqual(cmd.get_stderr(), '')
         self.assertEqual(cmd.get_return_code(), SUCCESS_RETURN_CODE)
 

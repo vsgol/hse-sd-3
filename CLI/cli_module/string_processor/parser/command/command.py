@@ -79,7 +79,7 @@ class DeclareCommand(Command):
     def __init__(self, args):
         """Inits DeclareCommand attributes with values from provided arguments
         Args:
-            args: Expected to contain two values. First is considered as variable name second as variable new value
+            args: Expected to contain two values. First is considered as variable name, second as variable new value
         Raises:
             ValueError: received more or less than two arguments
         """
@@ -115,14 +115,14 @@ def get_file_bytes(file_name):
     Returns:
         Tuple of read bytes, error message and exit code
     """
-    bs = b''
+    read_bites = b''
     stderr = ''
     return_code = SUCCESS_RETURN_CODE
     try:
         if os.path.isdir(file_name):
             raise IsADirectoryError()
         with open(file_name, 'rb') as file:
-            bs = file.read()
+            read_bites = file.read()
     except FileNotFoundError:
         stderr = f'cat: {file_name}: No such file or directory'
         return_code = FAILED_FILE_OPEN_RETURN_CODE
@@ -135,7 +135,7 @@ def get_file_bytes(file_name):
     except Exception as e:
         stderr = f'cat: Error while reading file' + str(e)
         return_code = OTHER_RETURN_CODE
-    return bs, stderr, return_code
+    return read_bites, stderr, return_code
 
 
 class CatCommand(Command):

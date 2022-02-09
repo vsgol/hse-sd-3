@@ -28,4 +28,4 @@ jobs:
           python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          nosetests CLI
+          nose2 CLI
