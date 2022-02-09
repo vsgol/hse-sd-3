@@ -78,7 +78,7 @@ class TestCommands(unittest.TestCase):
 
         for fn, content in [(fn1, content1), (fn2, content2), (fn3, content3)]:
             self.create_file(fn, content)
-            bs, stderr, return_code = get_file_bytes(fn)
+            bs, stderr, return_code = get_file_bytes(fn, '')
             self.assertEqual(bs, content)
             self.assertEqual(stderr, '')
             self.assertEqual(return_code, SUCCESS_RETURN_CODE)
@@ -86,13 +86,13 @@ class TestCommands(unittest.TestCase):
         for fn in [fn1, fn2, fn3]:
             self.remove_file(fn)
 
-        bs, stderr, return_code = get_file_bytes('no_such_file')
+        bs, stderr, return_code = get_file_bytes('no_such_file', '')
         self.assertEqual(bs, b'')
         self.assertEqual(return_code, FAILED_FILE_OPEN_RETURN_CODE)
 
         direct = 'new_directory'
         os.mkdir(direct)
-        bs, stderr, return_code = get_file_bytes(direct)
+        bs, stderr, return_code = get_file_bytes(direct, '')
         self.assertEqual(bs, b'')
         self.assertEqual(return_code, FAILED_FILE_OPEN_RETURN_CODE)
         os.rmdir(direct)

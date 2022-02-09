@@ -108,10 +108,11 @@ class DeclareCommand(Command):
         return self.return_code
 
 
-def get_file_bytes(file_name):
+def get_file_bytes(file_name, calling_command):
     """Reads bytes from file
     Args:
         file_name: target file name
+        calling_command: command which called function
     Returns:
         Tuple of read bytes, error message and exit code
     """
@@ -124,16 +125,16 @@ def get_file_bytes(file_name):
         with open(file_name, 'rb') as file:
             read_bites = file.read()
     except FileNotFoundError:
-        stderr = f'cat: {file_name}: No such file or directory'
+        stderr = f'{calling_command}: {file_name}: No such file or directory'
         return_code = FAILED_FILE_OPEN_RETURN_CODE
     except IsADirectoryError:
-        stderr = f'cat: {file_name}: Is a directory'
+        stderr = f'{calling_command}: {file_name}: Is a directory'
         return_code = FAILED_FILE_OPEN_RETURN_CODE
     except PermissionError:
-        stderr = f'cat: {file_name}: Permission denied'
+        stderr = f'{calling_command}: {file_name}: Permission denied'
         return_code = FAILED_FILE_OPEN_RETURN_CODE
     except Exception as e:
-        stderr = f'cat: Error while reading file' + str(e)
+        stderr = f'{calling_command}: Error while reading file' + str(e)
         return_code = OTHER_RETURN_CODE
     return read_bites, stderr, return_code
 
@@ -165,7 +166,7 @@ class CatCommand(Command):
             self.return_code = SUCCESS_RETURN_CODE
             self.stdout = inp
             return self.return_code
-        bs, self.stderr, self.return_code = get_file_bytes(self.file_name)
+        bs, self.stderr, self.return_code = get_file_bytes(self.file_name, 'cat')
         if self.return_code == SUCCESS_RETURN_CODE:
             self.stdout = bs.decode('utf-8')
         return self.return_code
@@ -226,7 +227,7 @@ class WcCommand(Command):
             n_bytes = len(inp.encode('utf-8'))
             string = inp
         else:
-            bs, self.stderr, self.return_code = get_file_bytes(self.file_name)
+            bs, self.stderr, self.return_code = get_file_bytes(self.file_name, 'wc')
             if self.return_code != SUCCESS_RETURN_CODE:
                 return self.return_code
             n_bytes = len(bs)
@@ -320,7 +321,7 @@ class OtherCommand(Command):
         try:
             out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
                                    stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
+                                   stderr=subprocess.PIPE,
                                    env=memory.get_env(), shell=(os.name == 'nt'))
         except Exception as e:
             self.stdout = ''
@@ -330,14 +331,15 @@ class OtherCommand(Command):
 
         self.stdout, self.stderr = out.communicate()
 
+        encoding = '866' if os.name == 'nt' else 'utf-8'
         if self.stdout is None:
             self.stdout = ''
         else:
-            self.stdout = self.stdout.decode('utf-8')
+            self.stdout = self.stdout.decode(encoding)
         if self.stderr is None:
             self.stderr = ''
         else:
-            self.stderr = self.stderr.decode('utf-8')
+            self.stderr = self.stderr.decode(encoding)
 
         self.return_code = out.returncode
         return self.return_code
