@@ -4,7 +4,6 @@ import unittest
 
 from .app import MainApp
 
-
 class MyTestCase(unittest.TestCase):
     def test_exit(self):
 
@@ -28,7 +27,7 @@ class MyTestCase(unittest.TestCase):
 
         with open(out_file_name, 'r') as f:
             content = f.read()[:-1]  # new line remove
-            self.assertEqual(content, f'>>> stdout: \nstderr:')
+            self.assertEqual(content, f'>>> ')
 
         os.remove(in_file_name)
         os.remove(out_file_name)
