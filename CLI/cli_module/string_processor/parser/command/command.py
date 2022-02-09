@@ -1,12 +1,13 @@
 import os
 import subprocess
+from abc import ABC, abstractmethod
 
 SUCCESS_RETURN_CODE = 0
 FAILED_FILE_OPEN_RETURN_CODE = 1
 OTHER_RETURN_CODE = 255
 
 
-class Command:
+class Command(ABC):
     """Abstract command class
     Attributes:
         return_code: command return code
@@ -19,6 +20,7 @@ class Command:
         self.stdout = None
         self.stderr = None
 
+    @abstractmethod
     def execute(self, inp: str, memory=None):
         """Execution virtual function
         Args:

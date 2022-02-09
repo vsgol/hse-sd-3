@@ -15,17 +15,8 @@ class TestCommands(unittest.TestCase):
         self.assertEqual(cmd.is_exit(), isinstance(cmd, ExitCommand))
 
     def test_abstract_command(self):
-        cmd = Command()
-
-        self.assertIsNone(cmd.return_code)
-        self.assertIsNone(cmd.stderr)
-        self.assertIsNone(cmd.stdout)
-
-        with self.assertRaises(NotImplementedError):
-            cmd.execute('input')
-        self.check_commands_common(cmd)
-
-        self.assertFalse(cmd.is_exit())
+        with self.assertRaises(TypeError):
+            Command()
 
     def test_declare(self):
         with self.assertRaises(ValueError):
