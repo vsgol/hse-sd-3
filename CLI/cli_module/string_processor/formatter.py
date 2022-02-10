@@ -3,8 +3,10 @@
 import re
 from string import Template
 
+from cli_module.memory import Memory
 
-def substitute(input_string: str, memory: dict) -> str:
+
+def substitute(input_string: str, memory: Memory) -> str:
     """
     selects substrings in quotes in the input string and substitutes variables if they are not in single quotes
 
@@ -13,14 +15,14 @@ def substitute(input_string: str, memory: dict) -> str:
     :return: Substitution result
     """
 
-    pattern = re.compile("""((\\.)|[^\\"'])+|("((\\.)|[^"])*")|('((\\.)|[^\\'])*')""")
+    pattern = re.compile("""((\\\.)|[^"'\\\])+|("((\\\.)|[^"])*")|('((\\\.)|[^'\\\])*')""")
     pos = 0
     res = []
     for substring in pattern.finditer(input_string):
         new_pos = pos + len(substring[0])
         if substring[0] != "'":
             try:
-                substring = Template(substring[0]).substitute(memory)
+                substring = Template(substring[0]).substitute(memory.get_env())
             except ValueError as err:
                 print(f'ValueError {err!s}')
             except KeyError as err:

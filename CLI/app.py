@@ -1,8 +1,8 @@
-from CLI.src.string_processor.string_processor import StringProcessor
-from CLI.src.executor import Executor
-from CLI.src.reader import Reader
-from CLI.src.writer import Writer
-from CLI.src.memory import Memory
+from cli_module.string_processor.string_processor import StringProcessor
+from cli_module.executor import Executor
+from cli_module.reader import Reader
+from cli_module.writer import Writer
+from cli_module.memory import Memory
 
 
 class MainApp:
@@ -34,12 +34,12 @@ class MainApp:
                 except KeyboardInterrupt:
                     continue
                 try:
-                    commands = self.string_processor.process(input_line)
+                    commands = self.string_processor.process(input_line, self.memory)
                 except Exception:
                     self.writer.print_outputs('', 'Failed to parse input')
                     continue
                 try:
-                    stdout, stderr = self.executor.execute(commands, memory)
+                    stdout, stderr = self.executor.execute(commands, self.memory)
                 except Exception:
                     self.writer.print_outputs('', 'Failed to execute commands')
                     continue

@@ -1,3 +1,13 @@
+import os
+
+
+class EnvDict(dict):
+    """Dict which returns empty string if there is no key"""
+    def __getitem__(self, key):
+        res = dict.get(self, key)
+        return res if res is not None else ""
+
+
 class Memory:
     """Responsible for storing environment variables
 
@@ -5,7 +15,7 @@ class Memory:
             data: A dict storing environment variables
     """
     def __init__(self):
-        self.data = {}
+        self.data = EnvDict(os.environ)
 
     def get_value(self, key):
         """Gets value for key
