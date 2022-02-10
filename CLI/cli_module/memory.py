@@ -1,4 +1,5 @@
 import os
+from typing import Mapping, Iterator
 
 
 class EnvDict(dict):
@@ -8,12 +9,25 @@ class EnvDict(dict):
         return res if res is not None else ""
 
 
-class Memory:
+class Memory(Mapping[str, str]):
     """Responsible for storing environment variables
 
         Attributes:
             data: A dict storing environment variables
     """
+
+    def __setitem__(self, key: str, value: str):
+        return self.set_value(key, value)
+
+    def __getitem__(self, key: str) -> str:
+        return self.get_value(key)
+
+    def __len__(self) -> int:
+        return self.data.__len__()
+
+    def __iter__(self) -> Iterator:
+        return self.data.__iter__()
+
     def __init__(self):
         self.data = EnvDict(os.environ)
 
