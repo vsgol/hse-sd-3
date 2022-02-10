@@ -40,12 +40,12 @@ class MainApp:
                     continue
                 try:
                     stdout, stderr = self.executor.execute(commands, self.memory)
-                except Exception:
-                    self.writer.print_outputs('', 'Failed to execute commands')
+                except Exception as e:
+                    self.writer.print_outputs('', 'Failed to execute commands ' + str(e))
                     continue
                 self.writer.print_outputs(stdout, stderr)
-        except Exception:
-            self.writer.print_outputs('', 'Failed to read input')
+        except Exception as e:
+            self.writer.print_outputs('', 'Terminating CLI. ' + str(e))
 
 
 if __name__ == '__main__':

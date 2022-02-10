@@ -26,7 +26,7 @@ class TestApp(unittest.TestCase):
 
         with open(in_file_name, 'w') as f:
             f.write(inp)
-
+        default_out = sys.stdout
         with open(in_file_name, 'r') as f_in:
             sys.stdin = f_in
             with open(out_file_name, 'w') as f_out:
@@ -34,7 +34,7 @@ class TestApp(unittest.TestCase):
                 sys.stdout = f_out
 
                 app.start()
-
+        sys.stdout = default_out
         with open(out_file_name, 'r') as f:
             content = f.read()
             self.assertEqual(content, expected_output)
@@ -82,6 +82,13 @@ class TestApp(unittest.TestCase):
             format_out('', ''),
             ])
         self.run_pipe(inp, out)
+
+    def test_invalid_input(self):
+        inputs = ['x=', '\'', '"', '""', '\'\'', '=10']
+
+        out = '>>> stderr: Failed to parse input\n>>> '
+        for inp in inputs:
+            self.run_pipe([inp, 'exit'], out)
 
 
 if __name__ == '__main__':

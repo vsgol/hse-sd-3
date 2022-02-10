@@ -8,8 +8,8 @@ from .reader import Reader
 class TestReader(unittest.TestCase):
     def test_reader(self):
         inp1 = 'one line'
-        inp2 = 'one line\nsecond line\n\n\n\n\tthird line'
-        inp3 = 'one line\nsecond line\n\n\n\n\tthird line\n more lines    are writen \n c:'
+        inp2 = 'one line\nsecond line\n\tthird line'
+        inp3 = 'one line\nsecond line\n\tthird line\n more lines    are writen \n c:'
         file_name = 'testing_input_file.txt'
 
         reader = Reader()

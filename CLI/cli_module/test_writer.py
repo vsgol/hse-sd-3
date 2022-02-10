@@ -30,6 +30,7 @@ class TestWriter(unittest.TestCase):
                 if se != '':
                     correct += f'stderr: {se}'
                 self.assertEqual(content, correct)
+        sys.stdout = stdout
         os.remove(file_name)
 
 
