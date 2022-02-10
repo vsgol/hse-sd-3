@@ -6,7 +6,12 @@ from app import MainApp
 
 
 def format_out(out, err):
-        return f'>>> stdout: {out}\nstderr:{err}'
+    correct = '>>> '
+    if out != '':
+        correct += f'stdout: {out}\n'
+    if err != '':
+        correct += f'stderr: {err}\n'
+    return correct
 
 
 class TestApp(unittest.TestCase):
@@ -31,7 +36,7 @@ class TestApp(unittest.TestCase):
                 app.start()
 
         with open(out_file_name, 'r') as f:
-            content = f.read()[:-1]  # new line remove
+            content = f.read()
             self.assertEqual(content, expected_output)
 
         os.remove(in_file_name)
@@ -44,7 +49,7 @@ class TestApp(unittest.TestCase):
 
     def test_echo(self):
         inp = ['echo "Some text"', 'exit']
-        out = '\n'.join([
+        out = ''.join([
             format_out('Some text', ''),
             format_out('', ''),
             ])
@@ -53,14 +58,14 @@ class TestApp(unittest.TestCase):
     def test_env_vars(self):
         if os.name != 'nt':
             inp = ['echo "$USER $HOME"', 'exit']
-            out = '\n'.join([
+            out = ''.join([
                 format_out(f'{os.environ["USER"]} {os.environ["HOME"]}', ''),
                 format_out('', ''),
                 ])
             self.run_pipe(inp, out)
         else:
             inp = ['echo "$WINDIR"', 'exit']
-            out = '\n'.join([
+            out = ''.join([
                 format_out(f'{os.environ["WINDIR"]}', ''),
                 format_out('', ''),
             ])
@@ -70,7 +75,7 @@ class TestApp(unittest.TestCase):
         var = 'my_cool_variable_which_is_not_in_system'
         inp = [f'echo "${var}"', f'{var}=10', f'echo "${var}"', 'exit']
 
-        out = '\n'.join([
+        out = ''.join([
             format_out('', ''),
             format_out('', ''),
             format_out('10', ''),
