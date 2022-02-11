@@ -46,6 +46,7 @@ class MyTestCase(unittest.TestCase):
         current_vars.clear()
 
         self.assertEqual('$', substitute('$$', test_memory))
+        self.assertEqual('', substitute('', test_memory))
 
     def test_quotes(self):
         current_vars = []
@@ -86,6 +87,9 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual(f'''test substitute var = '$${var_name}' ''', res)
 
             current_vars.remove(var_name)
+        for err_string in ['\'', '\"', 'test \'', 'test "arg1" \'arg2\"\' \"', '\'\'\'']:
+            with self.assertRaises(ValueError):
+                substitute(err_string, test_memory)
 
 
 if __name__ == '__main__':

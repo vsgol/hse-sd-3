@@ -52,7 +52,7 @@ class TestApp(unittest.TestCase):
         out = ''.join([
             format_out('Some text', ''),
             format_out('', ''),
-            ])
+        ])
         self.run_pipe(inp, out)
 
     def test_env_vars(self):
@@ -61,7 +61,7 @@ class TestApp(unittest.TestCase):
             out = ''.join([
                 format_out(f'{os.environ["USER"]} {os.environ["HOME"]}', ''),
                 format_out('', ''),
-                ])
+            ])
             self.run_pipe(inp, out)
         else:
             inp = ['echo "$WINDIR"', 'exit']
@@ -80,25 +80,26 @@ class TestApp(unittest.TestCase):
             format_out('', ''),
             format_out('10', ''),
             format_out('', ''),
-            ])
+        ])
         self.run_pipe(inp, out)
 
     def test_invalid_input(self):
         inputs = ['x=', '\'', '"', '""', '\'\'', '=10']
-        outputs = ['>>> stderr: Failed to parse input: None\n>>> ',
-                   '>>> stderr: Failed to parse input: None\n>>> ',
-                   '>>> stderr: Failed to parse input: None\n>>> ',
-                   '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
-                   '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
-                   '>>> stderr: Failed to parse input: LexToken(EQUAL,\'=\',1,0)\n>>> ']
+        outputs = [
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable value, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to substitute variables: Uncovered quote: col 0\n>>> ',
+            '>>> stderr: Failed to substitute variables: Uncovered quote: col 0\n>>> ',
+            '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
+            '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 0\n>>> ']
         for inp, out in zip(inputs, outputs):
             self.run_pipe([inp, 'exit'], out)
 
     def test_quotes(self):
         var_name = 'var_name'
         inp = [
-            f'{var_name}=10', 
-            f'echo "{var_name}=${var_name}"', 
+            f'{var_name}=10',
+            f'echo "{var_name}=${var_name}"',
             f'echo \'{var_name}=${var_name}\'',
             f'echo "\'{var_name}=${var_name}\'"',
             f'echo \'"{var_name}=${var_name}"\'',
@@ -111,8 +112,9 @@ class TestApp(unittest.TestCase):
             format_out(f'\'{var_name}=10\'', ''),
             format_out(f'"{var_name}=${var_name}"', ''),
             format_out('', ''),
-            ])
+        ])
         self.run_pipe(inp, out)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -32,7 +32,7 @@ class MainApp:
                 try:
                     commands = self.string_processor.process(input_line, self.memory)
                 except ValueError as e:
-                    self.writer.print_outputs('', f'Incorrect variable names: {e!s}')
+                    self.writer.print_outputs('', f'Failed to substitute variables: {e!s}')
                     continue
                 except Exception as e:
                     self.writer.print_outputs('', f'Failed to parse input: {e!s}')

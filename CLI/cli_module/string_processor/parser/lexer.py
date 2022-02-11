@@ -10,7 +10,7 @@ class IllegalCharacter(Exception):
         self.col = col
 
     def __str__(self):
-        return "{}, line {}, col {}".format(self.value, self.line, self.col)
+        return "{!s}, line {}, col {}".format(self.value, self.line, self.col)
 
 
 class Lexer:

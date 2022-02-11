@@ -19,6 +19,8 @@ def substitute(input_string: str, memory: Memory) -> str:
     col = 0
     res = []
     for matching in pattern.finditer(input_string):
+        if col != matching.start():
+            raise ValueError(f'Uncovered quote: col {col}')
         new_col = col + len(matching[0])
         if matching[0][0] != "'":
             try:
@@ -27,11 +29,11 @@ def substitute(input_string: str, memory: Memory) -> str:
                 matching = re.match(
                     'Invalid placeholder in string: line (?P<line_num>[-+]?\d+), col (?P<col_num>[-+]?\d+)',
                     err.args[0])
-                raise ValueError(
-                    'Invalid placeholder in string: line {}, col {}'.format(matching.group('line_num'),
-                                                                            int(matching.group('col_num')) + col))
+                raise ValueError('Invalid placeholder in string: col {}'.format(int(matching.group('col_num')) + col))
         else:
             matching = matching[0]
         res.append(matching)
         col = new_col
+    if col != len(input_string):
+        raise ValueError(f'Uncovered quote: col {col}')
     return ''.join(res)

@@ -8,11 +8,16 @@ from .lexer import Lexer, IllegalCharacter
 
 
 class IncompleteToken(Exception):
-    def __init__(self, value):
+    def __init__(self, value, line=None, col=None):
         self.value = value
+        self.line = line
+        self.col = col
 
     def __str__(self):
-        return str(self.value)
+        if self.line is not None:
+            return "{!s}, line {}, col {}".format(self.value, self.line, self.col)
+        else:
+            return "{!s}".format(self.value)
 
 
 class Parser:
@@ -29,6 +34,16 @@ class Parser:
         if re.fullmatch('[_a-z][_a-z0-9]*', p[1], re.IGNORECASE) is None:
             raise IllegalCharacter(f'Incorrect variable name "{p[1]}"', p.slice[1].lineno, p.slice[1].lexpos)
         p[0] = self.factory.build_declare_command(p[1], p[3])
+
+    def p_wrong_declaration(self, p):
+        """wrong_declaration : EQUAL value
+                             | STRING EQUAL"""
+        if p[1] == '=':
+            raise IncompleteToken(f'Incorrect declaration, missing variable name', p.slice[1].lineno, p.slice[1].lexpos)
+        else:
+            raise IncompleteToken(f'Incorrect declaration, missing variable value',
+                                  p.slice[1].lineno,
+                                  p.slice[1].lexpos)
 
     def p_value_sequence(self, p):
         """value_sequence : value value_sequence
@@ -52,6 +67,7 @@ class Parser:
 
     def p_command(self, p):
         """command : declaration
+                   | wrong_declaration
                    | function_call"""
         p[0] = p[1]
 
