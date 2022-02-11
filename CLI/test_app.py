@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 
-from app import MainApp
+from .app import MainApp
 
 
 def format_out(out, err):
@@ -85,9 +85,13 @@ class TestApp(unittest.TestCase):
 
     def test_invalid_input(self):
         inputs = ['x=', '\'', '"', '""', '\'\'', '=10']
-
-        out = '>>> stderr: Failed to parse input\n>>> '
-        for inp in inputs:
+        outputs = ['>>> stderr: Failed to parse input: None\n>>> ',
+                   '>>> stderr: Failed to parse input: None\n>>> ',
+                   '>>> stderr: Failed to parse input: None\n>>> ',
+                   '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
+                   '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
+                   '>>> stderr: Failed to parse input: LexToken(EQUAL,\'=\',1,0)\n>>> ']
+        for inp, out in zip(inputs, outputs):
             self.run_pipe([inp, 'exit'], out)
 
 

@@ -1,9 +1,4 @@
-from cli_module.string_processor.parser import IllegalCharacter, IncompleteToken
-from cli_module.string_processor.string_processor import StringProcessor
-from cli_module.executor import Executor
-from cli_module.reader import Reader
-from cli_module.writer import Writer
-from cli_module.memory import Memory
+from CLI.cli_module import Reader, Writer, Memory, StringProcessor, Executor
 
 
 class MainApp:
