@@ -8,4 +8,7 @@ class Writer:
                 stdout: A str for output
                 stderr: A str for errors
         """
-        print(f'stdout: {stdout}\nstderr:{stderr}')
+        if stdout != '':
+            print(f'stdout: {stdout}')
+        if stderr != '':
+            print(f'stderr: {stderr}')

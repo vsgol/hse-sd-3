@@ -1,8 +1,4 @@
-from cli_module.string_processor.string_processor import StringProcessor
-from cli_module.executor import Executor
-from cli_module.reader import Reader
-from cli_module.writer import Writer
-from cli_module.memory import Memory
+from CLI.cli_module import Reader, Writer, Memory, StringProcessor, Executor
 
 
 class MainApp:
@@ -25,13 +21,30 @@ class MainApp:
 
     def start(self):
         """Runs process"""
-        while True:
-            if self.executor.is_shell_terminated():
-                break
-            input_line = self.reader.get_line()
-            commands = self.string_processor.process(input_line, self.memory)
-            stdout, stderr = self.executor.execute(commands, self.memory)
-            self.writer.print_outputs(stdout, stderr)
+        try:
+            while True:
+                if self.executor.is_shell_terminated():
+                    break
+                try:
+                    input_line = self.reader.get_line()
+                except KeyboardInterrupt:
+                    continue
+                try:
+                    commands = self.string_processor.process(input_line, self.memory)
+                except ValueError as e:
+                    self.writer.print_outputs('', f'Incorrect variable names: {e!s}')
+                    continue
+                except Exception as e:
+                    self.writer.print_outputs('', f'Failed to parse input: {e!s}')
+                    continue
+                try:
+                    stdout, stderr = self.executor.execute(commands, self.memory)
+                except Exception as e:
+                    self.writer.print_outputs('', 'Failed to execute commands ' + str(e))
+                    continue
+                self.writer.print_outputs(stdout, stderr)
+        except Exception as e:
+            self.writer.print_outputs('', 'Terminating CLI. ' + str(e))
 
 
 if __name__ == '__main__':

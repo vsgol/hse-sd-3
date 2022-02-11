@@ -4,7 +4,7 @@ from typing import List, Dict
 from .formatter import substitute
 from .parser import Parser
 from .parser.command import Command
-from cli_module.memory import Memory
+from CLI.cli_module.memory import Memory
 
 
 class StringProcessor:

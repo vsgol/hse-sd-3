@@ -3,7 +3,7 @@
 import re
 from string import Template
 
-from cli_module.memory import Memory
+from CLI.cli_module.memory import Memory
 
 
 def substitute(input_string: str, memory: Memory) -> str:
@@ -16,17 +16,22 @@ def substitute(input_string: str, memory: Memory) -> str:
     """
 
     pattern = re.compile("""((\\\.)|[^"'\\\])+|("((\\\.)|[^"])*")|('((\\\.)|[^'\\\])*')""")
-    pos = 0
+    col = 0
     res = []
-    for substring in pattern.finditer(input_string):
-        new_pos = pos + len(substring[0])
-        if substring[0] != "'":
+    for matching in pattern.finditer(input_string):
+        new_col = col + len(matching[0])
+        if matching[0][0] != "'":
             try:
-                substring = Template(substring[0]).substitute(memory.get_env())
+                matching = Template(matching[0]).substitute(memory)
             except ValueError as err:
-                print(f'ValueError {err!s}')
-            except KeyError as err:
-                print(f'KeyError {err!s}')
-        res.append(substring)
-        pos = new_pos
+                matching = re.match(
+                    'Invalid placeholder in string: line (?P<line_num>[-+]?\d+), col (?P<col_num>[-+]?\d+)',
+                    err.args[0])
+                raise ValueError(
+                    'Invalid placeholder in string: line {}, col {}'.format(matching.group('line_num'),
+                                                                            int(matching.group('col_num')) + col))
+        else:
+            matching = matching[0]
+        res.append(matching)
+        col = new_col
     return ''.join(res)

@@ -1,9 +1,10 @@
+import re
 from typing import List
 
 import ply.yacc as yacc
 
 from .command import CommandFactory, Command
-from .lexer import Lexer
+from .lexer import Lexer, IllegalCharacter
 
 
 class IncompleteToken(Exception):
@@ -11,7 +12,7 @@ class IncompleteToken(Exception):
         self.value = value
 
     def __str__(self):
-        return repr(self.value)
+        return str(self.value)
 
 
 class Parser:
@@ -25,6 +26,8 @@ class Parser:
     # ==> Defining the context-free grammar specifications
     def p_declaration(self, p):
         """declaration : STRING EQUAL value"""
+        if re.fullmatch('[_a-z][_a-z0-9]*', p[1], re.IGNORECASE) is None:
+            raise IllegalCharacter(f'Incorrect variable name "{p[1]}"', p.slice[1].lineno, p.slice[1].lexpos)
         p[0] = self.factory.build_declare_command(p[1], p[3])
 
     def p_value_sequence(self, p):

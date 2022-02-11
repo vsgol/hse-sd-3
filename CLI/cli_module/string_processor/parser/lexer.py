@@ -4,12 +4,13 @@ from ply import lex
 
 
 class IllegalCharacter(Exception):
-    def __init__(self, value, line):
+    def __init__(self, value, line, col):
         self.value = value
         self.line = line
+        self.col = col
 
     def __str__(self):
-        return repr("{}, line {}".format(self.value, self.line))
+        return "{}, line {}, col {}".format(self.value, self.line, self.col)
 
 
 class Lexer:
@@ -62,7 +63,7 @@ class Lexer:
     @staticmethod
     def t_error(t):
         # The lexer stops executing and raise a LexerError
-        raise IllegalCharacter(t.value[0], t.lineno)
+        raise IllegalCharacter(t.value[0], t.lineno, t.lexpos)
 
     @staticmethod
     def find_column(inp, token):

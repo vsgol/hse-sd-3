@@ -7,5 +7,7 @@ class Reader:
             Returns:
                 A string for user input
         """
-        user_input = input('>>> ')
+        user_input = ''
+        while not len(user_input):
+            user_input = input('>>> ')
         return user_input

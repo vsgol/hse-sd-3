@@ -24,7 +24,13 @@ class TestWriter(unittest.TestCase):
                 writer.print_outputs(so, se)
             with open(file_name, 'r') as f:
                 content = f.read()[:-1]  # new line remove
-                self.assertEqual(content, f'stdout: {so}\nstderr:{se}')
+                correct = ''
+                if so != '':
+                    correct += f'stdout: {so}\n'
+                if se != '':
+                    correct += f'stderr: {se}'
+                self.assertEqual(content, correct)
+        sys.stdout = stdout
         os.remove(file_name)
 
 
