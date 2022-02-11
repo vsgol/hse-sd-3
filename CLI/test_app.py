@@ -94,5 +94,25 @@ class TestApp(unittest.TestCase):
         for inp, out in zip(inputs, outputs):
             self.run_pipe([inp, 'exit'], out)
 
+    def test_quotes(self):
+        var_name = 'var_name'
+        inp = [
+            f'{var_name}=10', 
+            f'echo "{var_name}=${var_name}"', 
+            f'echo \'{var_name}=${var_name}\'',
+            f'echo "\'{var_name}=${var_name}\'"',
+            f'echo \'"{var_name}=${var_name}"\'',
+            'exit'
+        ]
+        out = ''.join([
+            format_out('', ''),
+            format_out(f'{var_name}=10', ''),
+            format_out(f'{var_name}=${var_name}', ''),
+            format_out(f'\'{var_name}=10\'', ''),
+            format_out(f'"{var_name}=${var_name}"', ''),
+            format_out('', ''),
+            ])
+        self.run_pipe(inp, out)
+
 if __name__ == '__main__':
     unittest.main()

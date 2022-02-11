@@ -1,4 +1,4 @@
-from CLI.cli_module import Reader, Writer, Memory, StringProcessor, Executor
+from cli_module import Reader, Writer, Memory, StringProcessor, Executor
 
 
 class MainApp:
