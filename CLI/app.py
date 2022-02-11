@@ -1,3 +1,4 @@
+from cli_module.string_processor.parser import IllegalCharacter, IncompleteToken
 from cli_module.string_processor.string_processor import StringProcessor
 from cli_module.executor import Executor
 from cli_module.reader import Reader
@@ -35,8 +36,11 @@ class MainApp:
                     continue
                 try:
                     commands = self.string_processor.process(input_line, self.memory)
-                except Exception:
-                    self.writer.print_outputs('', 'Failed to parse input')
+                except ValueError as e:
+                    self.writer.print_outputs('', f'Incorrect variable names: {e!s}')
+                    continue
+                except Exception as e:
+                    self.writer.print_outputs('', f'Failed to parse input: {e!s}')
                     continue
                 try:
                     stdout, stderr = self.executor.execute(commands, self.memory)
