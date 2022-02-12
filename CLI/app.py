@@ -28,6 +28,7 @@ class MainApp:
                 try:
                     input_line = self.reader.get_line()
                 except KeyboardInterrupt:
+                    print()
                     continue
                 try:
                     commands = self.string_processor.process(input_line, self.memory)
