@@ -3,7 +3,7 @@
 import re
 from string import Template
 
-from CLI.cli_module.memory import Memory
+from cli_module.memory import Memory
 
 
 def substitute(input_string: str, memory: Memory) -> str:
