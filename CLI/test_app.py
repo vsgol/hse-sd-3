@@ -83,15 +83,45 @@ class TestApp(unittest.TestCase):
         ])
         self.run_pipe(inp, out)
 
-    def test_invalid_input(self):
-        inputs = ['x=', '\'', '"', '""', '\'\'', '=10']
+    def test_invalid_definition(self):
+        inputs = ['x=', '=10', '=', '"x y"=10', 'x y=10', 'x = 10 13', '= =', 'x y == 1', 'x y == 1 2', 'x == 1 2', '\\\\ = 1']
         outputs = [
-            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable value, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable value, line 1, col 1\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name and value, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, incorrect variable name "x y", line 1, col 5\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, one variable name was expected, line 1, col 3\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, one value was expected, line 1, col 2\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name and value, line 1, col 2\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 5\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 5\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 3\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect declaration, incorrect variable name "\\\\", line 1, col 3\n>>> ']
+        for inp, out in zip(inputs, outputs):
+            self.run_pipe([inp, 'exit'], out)
+
+    def test_invalid_input(self):
+        inputs = ['\'', '"', 'a \'', 'a \"', 'a "arg1" "\'arg2\'" \'']
+        outputs = [
             '>>> stderr: Failed to substitute variables: Uncovered quote: col 0\n>>> ',
             '>>> stderr: Failed to substitute variables: Uncovered quote: col 0\n>>> ',
-            '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
-            '>>> stderr: Failed to parse input: LexToken(STRING_IN_QUOTES,\'\',1,0)\n>>> ',
-            '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 0\n>>> ']
+            '>>> stderr: Failed to substitute variables: Uncovered quote: col 2\n>>> ',
+            '>>> stderr: Failed to substitute variables: Uncovered quote: col 2\n>>> ',
+            '>>> stderr: Failed to substitute variables: Uncovered quote: col 18\n>>> ']
+        for inp, out in zip(inputs, outputs):
+            self.run_pipe([inp, 'exit'], out)
+
+    def test_invalid_input_pipe(self):
+        inputs = ['x = a | | echo 1', '| x = a', 'x = a | ', 'x = a ||', 'x = a |||', '|', '|x = a|']
+        outputs = [
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 8\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 6\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 7\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 8\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 0\n>>> ',
+            '>>> stderr: Failed to parse input: Incorrect pipeline, expected function call or variable declaration, line 1, col 6\n>>> '
+        ]
         for inp, out in zip(inputs, outputs):
             self.run_pipe([inp, 'exit'], out)
 

@@ -14,8 +14,8 @@ class MyTestCase(unittest.TestCase):
     formatted_values = ['value1', 'value2', 'test3', """te st 4""", '''te s t5''',
                         '''te\\st 6 "''', '''te\\\\st 7 \\"''']
 
-    incorrect_fun_names = ['fu\'n', 'fu\"n', '"fun"', "'fun'"]
-    incorrect_var_names = incorrect_fun_names  # TODO + ['1', '1var', '-var', 'var-', 'va-r', 'var>', 'va\\r']
+    incorrect_fun_names = ['fu\'n', 'fu\"n']
+    incorrect_var_names = incorrect_fun_names + ['1', '1var', '-var', 'var-', 'va-r', 'var>', 'va\\r']
 
     parser = Parser()
 
