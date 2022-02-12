@@ -96,7 +96,7 @@ class TestApp(unittest.TestCase):
             '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 5\n>>> ',
             '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 5\n>>> ',
             '>>> stderr: Failed to parse input: Incorrect declaration, missing variable name, line 1, col 3\n>>> ',
-            '>>> stderr: Failed to parse input: Incorrect declaration, incorrect variable name "\\\\", line 1, col 3\n>>> ']
+            '>>> stderr: Failed to parse input: Incorrect declaration, incorrect variable name "\\", line 1, col 3\n>>> ']
         for inp, out in zip(inputs, outputs):
             self.run_pipe([inp, 'exit'], out)
 

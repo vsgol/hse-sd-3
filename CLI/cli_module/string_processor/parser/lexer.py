@@ -14,6 +14,7 @@ class IllegalCharacter(Exception):
 
 
 class Lexer:
+    """Responsible for defining rules for tokenizer"""
     def __init__(self):
         self.lexer = lex.lex(module=self)
         self.lexer.linepos = 0
@@ -40,13 +41,19 @@ class Lexer:
     t_ignore = ' \t'
     t_PIPE = r'\|'
     t_EQUAL = '='
-    t_STRING = r"""(\\[bfrnt"/\\]|[^=|\s"'\u005C\u0000-\u001F\u007F-\u009F]|\\u[0-9a-fA-F]{4})+"""
 
+    @staticmethod
+    def t_STRING(t):
+        r"""(\\[bfrnt"/\\]|[^=|\s"'\u005C\u0000-\u001F\u007F-\u009F]|\\u[0-9a-fA-F]{4})+"""
+        t.value = re.subn('''\\\(?P<char>["\\\])''', '''\g<char>''', t.value)[0]
+        return t
+    
     @staticmethod
     def t_STRING_IN_QUOTES(t):
         r"""("((\\.)|[^\\"])*")|('((\\.)|[^\\'])*')"""
         if t.value[0] == '"':
             t.value = t.value[1:-1]
+            # 
             t.value = re.subn('''\\\(?P<char>["\\\])''', '''\g<char>''', t.value)[0]
         else:
             t.value = t.value[1:-1]

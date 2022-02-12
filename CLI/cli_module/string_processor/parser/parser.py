@@ -21,6 +21,12 @@ class IncompleteToken(Exception):
 
 
 class Parser:
+    """Responsible for the parser's grammar
+
+    methods:
+        parse: splits the input string into commands
+    """
+
     def __init__(self):
         self.lexer = Lexer()
         self.parser = make_parser(self)
@@ -36,6 +42,7 @@ class Parser:
                        | value_sequence EQUAL
                        | value_sequence EQUAL declaration
                        | value_sequence EQUAL value_sequence"""
+        # Only the last option is correct declaration, if both value_sequences have one value
         if len(p) == 2:
             if p[1] == '=':
                 raise IncompleteToken(f'Incorrect declaration, missing variable name and value',
@@ -50,10 +57,10 @@ class Parser:
         elif len(p) == 4:
             if p.slice[3].type == 'definition':
                 raise IncompleteToken(f'Incorrect declaration, one sign equal was expected',
-                                          p.slice[2].lineno, p.slice[2].lexpos)
+                                      p.slice[2].lineno, p.slice[2].lexpos)
             elif len(p[1]) > 1:
                 raise IncompleteToken(f'Incorrect declaration, one variable name was expected',
-                                       p.slice[2].lineno, p.slice[2].lexpos)
+                                      p.slice[2].lineno, p.slice[2].lexpos)
             elif len(p[3]) > 1:
                 raise IncompleteToken(f'Incorrect declaration, one value was expected',
                                       p.slice[2].lineno, p.slice[2].lexpos)
@@ -90,6 +97,7 @@ class Parser:
                     | PIPE pipeline
                     | command PIPE
                     | command PIPE pipeline"""
+        # first and last options are correct pipelines
         if len(p) == 2:
             if p[1] == '|':
                 raise IncompleteToken(f'Incorrect pipeline, expected function call or variable declaration',
@@ -111,6 +119,14 @@ class Parser:
         raise IncompleteToken(p)
 
     def parse(self, code: str) -> List[Command]:
+        """Splits the input string into commands
+        
+        args:
+            code (str): input string to split
+
+        returns:
+            List [Command]: sequence of pipeline commands
+        """
         return self.parser.parse(code, self.lexer)
 
 

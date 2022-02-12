@@ -7,12 +7,14 @@ from CLI.cli_module.memory import Memory
 
 
 def substitute(input_string: str, memory: Memory) -> str:
-    """
-    selects substrings in quotes in the input string and substitutes variables if they are not in single quotes
+    """Selects substrings in quotes in the input string and substitutes variables if they are not in single quotes
 
-    :param input_string: String for conversion
-    :param memory: Environment variables
-    :return: Substitution result
+    args:
+        input_string (str): String for conversion
+        memory (Memory): Environment variables
+
+    returns:
+        str: substitution result
     """
 
     pattern = re.compile("""((\\\.)|[^"'\\\])+|("((\\\.)|[^"])*")|('((\\\.)|[^'\\\])*')""")
