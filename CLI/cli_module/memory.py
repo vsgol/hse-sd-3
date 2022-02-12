@@ -1,21 +1,35 @@
 import os
+from typing import Mapping, Iterator
 
 
-class EnvDict(dict):
-    """Dict which returns empty string if there is no key"""
-    def __getitem__(self, key):
-        res = dict.get(self, key)
-        return res if res is not None else ""
+# class EnvDict(dict):
+#     """Dict which returns empty string if there is no key"""
+#     def __getitem__(self, key):
+#         res = dict.get(self, key)
+#         return res if res is not None else ""
 
 
-class Memory:
+class Memory(Mapping[str, str]):
     """Responsible for storing environment variables
 
         Attributes:
             data: A dict storing environment variables
     """
+
+    def __setitem__(self, key: str, value: str):
+        return self.set_value(key, value)
+
+    def __getitem__(self, key: str) -> str:
+        return self.get_value(key)
+
+    def __len__(self) -> int:
+        return self.data.__len__()
+
+    def __iter__(self) -> Iterator:
+        return self.data.__iter__()
+
     def __init__(self):
-        self.data = EnvDict(os.environ)
+        self.data = dict(os.environ)
 
     def get_value(self, key):
         """Gets value for key
@@ -25,7 +39,9 @@ class Memory:
             Returns:
                 A string value for variable if exists. Otherwise returns ''
         """
-        return self.data.get(key, '')
+        if key in self.data:
+            return self.data[key]
+        return ''
 
     def set_value(self, key, value):
         """Sets value for key

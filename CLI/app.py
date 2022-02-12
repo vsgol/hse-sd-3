@@ -1,8 +1,4 @@
-from cli_module.string_processor.string_processor import StringProcessor
-from cli_module.executor import Executor
-from cli_module.reader import Reader
-from cli_module.writer import Writer
-from cli_module.memory import Memory
+from cli_module import Reader, Writer, Memory, StringProcessor, Executor
 
 
 class MainApp:
@@ -32,11 +28,15 @@ class MainApp:
                 try:
                     input_line = self.reader.get_line()
                 except KeyboardInterrupt:
+                    print()
                     continue
                 try:
                     commands = self.string_processor.process(input_line, self.memory)
-                except Exception:
-                    self.writer.print_outputs('', 'Failed to parse input')
+                except ValueError as e:
+                    self.writer.print_outputs('', f'Failed to substitute variables: {e!s}')
+                    continue
+                except Exception as e:
+                    self.writer.print_outputs('', f'Failed to parse input: {e!s}')
                     continue
                 try:
                     stdout, stderr = self.executor.execute(commands, self.memory)

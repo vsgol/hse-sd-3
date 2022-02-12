@@ -28,7 +28,7 @@ jobs:
           python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          nose2 CLI
+          cd CLI; nose2
   build_win:
     runs-on: windows-latest
     steps:
@@ -42,7 +42,7 @@ jobs:
           python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          nose2 CLI
+          cd CLI; nose2
   build_mac:
     runs-on:  macos-latest
     steps:
@@ -56,5 +56,5 @@ jobs:
           python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          nose2 CLI
+          cd CLI; nose2
 
