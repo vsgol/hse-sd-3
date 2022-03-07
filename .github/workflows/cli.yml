@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ 02-cli, 02-cli-commands, 02-cli-main-app ]
+    branches: [ 02-cli, 02-cli-commands, 02-cli-main-app, 02-cli-full ]
   pull_request:
-    branches: [ 02-cli, 02-cli-commands, 02-cli-main-app ]
+    branches: [ 02-cli, 02-cli-commands, 02-cli-main-app, 02-cli-full ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
