@@ -169,7 +169,7 @@ class TestCommands(unittest.TestCase):
             self.assertEqual(cmd.get_return_code(), SUCCESS_RETURN_CODE)
 
         for i, (fn, content, ans) in enumerate([(fn1, content1, ans1), (fn2, content2, ans2),
-                                           (fn3, content3, ans3), (fn4, content4, ans4)]):
+                                                (fn3, content3, ans3), (fn4, content4, ans4)]):
             self.create_file(fn, content)
             cmd = WcCommand([fn, f'f{i}', f'f{i + 1}'])
 
@@ -257,6 +257,23 @@ class TestCommands(unittest.TestCase):
         self.check_commands_common(cmd)
         self.assertNotEquals(cmd.execute(''), SUCCESS_RETURN_CODE)
         self.assertNotEquals(cmd.execute('some input'), SUCCESS_RETURN_CODE)
+
+    def test_grep_fail(self):
+        for (args, rc, ans) in [
+            (['-A', '-1', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', '-30', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', 'string', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', '1'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Not enough arguments for grep'),
+        ]:
+            cmd = GrepCommand(args)
+            self.check_commands_common(cmd)
+            self.check_commands_common(cmd)
+            self.assertEquals(cmd.execute(''), FAILED_ARG_PARSE_RETURN_CODE)
+            self.assertEquals(cmd.get_stderr(), ans)
 
     def test_grep(self):
         content = 'Minimal grep syntax\nnew\nThis is another line\n And another one\nis'

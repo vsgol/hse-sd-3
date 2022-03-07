@@ -374,8 +374,7 @@ class GrepCommand(Command):
         self.parser = argparse.ArgumentParser(prog='grep')
         self.parser.add_argument('-w', dest='word', help='search only for complete word', action='store_true')
         self.parser.add_argument('-i', dest='case_insensitive', help='case-insensitive search', action='store_true')
-        self.parser.add_argument('-A', dest='lines_after', help='how many lines print after the match',
-                                 type=int, default=0)
+        self.parser.add_argument('-A', dest='lines_after', help='how many lines print after the match', default=0)
 
     def execute(self, inp: str, memory=None):
         """Finds target substing in file
@@ -392,6 +391,15 @@ class GrepCommand(Command):
             args, remaining = self.parser.parse_known_args(self.args)
         except argparse.ArgumentError as e:
             self.stderr = f'Failed to parse grep arguments: {str(e)}'
+            self.return_code = FAILED_ARG_PARSE_RETURN_CODE
+            return self.return_code
+
+        try:
+            args.lines_after = int(args.lines_after)
+            if args.lines_after < 0:
+                raise ValueError
+        except ValueError:
+            self.stderr = f'Value for -A argument must be non-negative integer'
             self.return_code = FAILED_ARG_PARSE_RETURN_CODE
             return self.return_code
 
