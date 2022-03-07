@@ -112,7 +112,8 @@ class Parser:
                 raise IncompleteToken(f'Incorrect pipeline, expected function call or variable declaration',
                                       p.slice[2].lineno, p.slice[2].lexpos)
         elif len(p) == 4:
-            p[0] = [p[1]].extend(p[3])
+            p[0] = [p[1]]
+            p[0].extend(p[3])
 
     # Error rule for parsing errors
     def p_error(self, p):
