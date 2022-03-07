@@ -36,11 +36,6 @@
 
 Если последняя команда является `exit`, то цикл останавливается
 
-<!--
-который подставляет в токены переменные окружения, склеивает токены, если между ними нет пробела (пример с exit из презентации), разбивает на группы по символу `|` в качестве разделителя. Полученные группы токенов подаются `Command Factory`, 
-которая на их основе создает потомков класса `Command`. Далее последовательность команд обрабатывается с помощью `Executor`, ответственного за запуск каждой команды и передачу данных между ними. После этого `Writer` выводит в stdout результат выполнения, если такой имеется, выводит ошибки, если таковые возникли на предыдущих шагах. На этом итерация цикла заканчивается. Выполнение команды `exit` прерывает цикл, информация об этом берется из `Executor` по окончании его работы.
--->
-
 ## **Memory**
 
 Отвечает за хранение переменных окружения.
@@ -54,7 +49,7 @@
 * `getValue(String name): String` -- возвращает значение переменной `name`
 * `setValue(String name, String value)` -- добавляет или обновляет переменную с именем `name`, используя
   значение `value`
-* `get_env()` -- возвращает все переменные среды
+* `getEnv()` -- возвращает все переменные среды
 
 При инициализации класса создается хеш-таблица, которая заполняется переменными внешнего окружения (например, с
 помощью `os.environ` в Python)
@@ -84,12 +79,12 @@
 * `substitute(String input, Memory memory): String` -- подставляет вместо переменных их значения из `memory`. Если
   переменная отсутствует в памяти, то подставляется пустая строка.
 
-Метод `substitute` разбивает строку на подстроки, где подстрока это либо строка, где в которой все кавычки экранированы,
+Метод `substitute` разбивает строку на подстроки, где подстрока это либо строка, в которой все кавычки экранированы,
 либо строка в одинарных или двойных кавычках. Далее в нужные подстроки подставляются значения переменных с
 помощью `Template strings`. Далее конкатенирует все строки и возвращает полученную строку.
 
 <details>
-<summary>Регулярное выражения для выделения первой подстроки:</summary>
+<summary>Регулярное выражение для выделения первой подстроки:</summary>
 
 ```python
 r"""^((\\.)|[^\\"'])+|("((\\.)|[^\\"])*")|('((\\.)|[^\\'])*')"""
@@ -149,7 +144,7 @@ pipeline : command
 Для разбиения строки на команды используется библиотека `yacc`. С помощью `Command Factory` полученные токены
 преобразуются в команды.
 
-(В теории токены можно обернуть в дополнительный класс, чтоб далее их проще различать, но непонятно на сколько это
+(В теории токены можно обернуть в дополнительный класс, чтоб далее их проще различать, но непонятно, насколько это
 оправданно, пока обходимся строками)
 
 ## **Command**
@@ -309,25 +304,3 @@ pipeline : command
 * `printOutputs(String stdout, String stderr)` -- выводит пользователю строки `stdout` и `stderr`
 
 Можно расширять для перенаправления вывода (если дальше потребуется)
-
-<!--
-## **Formatter**
-Класс, отвечающий за форматирование последовательности токенов и разбиение их на команды
-
-Методы:
-* `process(tokens, memory)` -- сначала проходится по всем токенам и для каждого токена, начинающегося с `$`, заменяет его на значение из `memory`, для каждого токена, начинающегося с `"` проходится по внутренности и делает аналогичные подстановки с `$`, если токен это `=`, то считаем присваивание корректным лишь если нам подали 3 токена на вход, при этом справа и слева некоторая строка, в противном случае кидаем исключение (разрешаем одно присваивание и только его за одну команду пользователя для простоты). 
-Если во время подстановки оказывается, что нужной переменной нет, то кидается исключение, сообщающее об этом. Параллельно с проходом подстановки можно бить токены по группам, используя в качестве разделителя `|`, если токены `|` идут подряд, то кидается исключение, говорящее об ошибке. Затем по каждой группе идет еще один проход, объединяющий токены, между которыми не было пробела (пример с exit из презентации), кроме того пробельные токены исключаются за дальнейшей ненадобностью
-
-
-
-`Main App` object contains `Memory` field for keeping variables values. `Memory` is a key-value storage.
-
-Then the string is parsed by a finite-state machine in `Formatter`, which substitutes variables with their values taken from `Memory`, skipping the substitution in single quotes
-
-The string is passed to the `Parser`, which splits the string into tokens and passes the resulting sequence (syntax tree if we need to support brackets, for now it seems much easier to use a list of commands) to the `Command Factory`.
-
-`Command Factory` creates a descendant of the `Command` class for each element of parsed sequence (or for each node of the syntax tree if we use one). Each `Command` object contains `execute` method for performing corresponding operation and takes required arguments (e.g. `Cat`'s `execute` method takes name of file and outputs provided file content)
-
-The tree is passed to the `Executor`, which sequentially calls all nodes with the `execute` method using provided arguments, passing the output to the following nodes as their input 
-
-The resulting output or error messages returns to the `Main App`, where it further output to the user. -->

@@ -145,6 +145,14 @@ class TestApp(unittest.TestCase):
         ])
         self.run_pipe(inp, out)
 
+    def test_problematic_pipe(self):
+        out = ''.join([
+            format_out('{:6d} {:6d} {:6d}'.format(1, 1, 3), ''),
+            format_out('', ''),
+        ])
+        inp = ['echo 123 | wc', 'exit']
+        self.run_pipe(inp, out)
+
 
 if __name__ == '__main__':
     unittest.main()

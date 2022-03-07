@@ -17,6 +17,7 @@ class Command(ABC):
         stdout: command output to stdout
         stderr: command output to stderr
     """
+
     def __init__(self):
         """Inits Command attributes with Nones"""
         self.return_code = None
@@ -81,6 +82,7 @@ class DeclareCommand(Command):
         variable: target variable name
         value: target variable new value
     """
+
     def __init__(self, args):
         """Inits DeclareCommand attributes with values from provided arguments
         Args:
@@ -149,6 +151,7 @@ class CatCommand(Command):
     Attributes:
         file_name: target file name
     """
+
     def __init__(self, args):
         """Inits CatCommand file_name if provided
         Args:
@@ -182,6 +185,7 @@ class EchoCommand(Command):
     Attributes:
         args: strings to output
     """
+
     def __init__(self, args):
         """Inits EchoCommand args
         Args:
@@ -209,6 +213,7 @@ class WcCommand(Command):
     Attributes:
         file_name: target file name
     """
+
     def __init__(self, args):
         """Inits WcCommand file_name if provided
         Args:
@@ -248,6 +253,7 @@ class WcCommand(Command):
 
 class PwdCommand(Command):
     """'pwd' command class"""
+
     def __init__(self, args):
         """Inits PwdCommand
         Args:
@@ -271,6 +277,7 @@ class PwdCommand(Command):
 
 class ExitCommand(Command):
     """'exit' command class"""
+
     def __init__(self, args):
         """Inits PwdCommand
         Args:
@@ -298,6 +305,7 @@ class ExitCommand(Command):
 
 class OtherCommand(Command):
     """Any other command class"""
+
     def __init__(self, args):
         """Inits OtherCommand arguments
         Attributes:
@@ -324,17 +332,17 @@ class OtherCommand(Command):
             raise ValueError('Did not get memory reference for OtherCommand execution')
 
         try:
-            out = subprocess.Popen(self.args + [inp] if len(inp) > 0 else self.args,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE,
-                                   env=memory.get_env(), shell=(os.name == 'nt'))
+            out = subprocess.run(self.args + [inp] if len(inp) > 0 else self.args,
+                                 capture_output=True,
+                                 env=memory.get_env(), shell=(os.name == 'nt'))
         except Exception as e:
             self.stdout = ''
             self.stderr = str(e)
             self.return_code = OTHER_RETURN_CODE
             return self.return_code
 
-        self.stdout, self.stderr = out.communicate()
+        self.stdout = out.stdout
+        self.stderr = out.stderr
 
         encoding = '866' if os.name == 'nt' else 'utf-8'
         if self.stdout is None:
