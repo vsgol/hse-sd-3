@@ -22,3 +22,6 @@ class GameEntity(ABC):
         :argument other: entity which intersected
         """
         pass
+
+    def __str__(self):
+        return self.glyph.symbol

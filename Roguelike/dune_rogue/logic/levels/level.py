@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.render.scene import Scene
 
@@ -25,11 +28,13 @@ class Level(Scene):
         for ent in self.acting_entities:
             text[ent.y][ent.x] = ent.glyph.symbol
             colors[ent.y][ent.x] = ent.glyph.color
-
+        text[self.player.y][self.player.x] = self.player.glyph.symbol
         return text, colors
 
     def process_input(self, action):
-        pass
+        # Process player input
+        for ent in self.acting_entities:
+            ent.upadte()
 
     def __init__(self, load_file, player):
         """
@@ -57,7 +62,7 @@ class Level(Scene):
 
             for i in range(h):
                 ent_row = []
-                ent_symbols = file.readline().split()
+                ent_symbols = file.readline()
                 for j in range(w):
                     ent_row.append(_STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
                 self.static_entities.append(ent_row)
