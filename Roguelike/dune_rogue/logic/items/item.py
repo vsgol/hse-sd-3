@@ -27,8 +27,14 @@ class InventoryItem:
 
     def equip(self):
         """Make item equipped"""
+        if not self.can_be_equipped:
+            raise RuntimeError('Equipping which can\'t be equipped')
+        if self.is_equipped:
+            raise RuntimeError('Equipping equipped item')
         self.is_equipped = True
 
     def unequip(self):
         """Make item unequipped"""
+        if not self.is_equipped:
+            raise RuntimeError('Unequipping unequipped item')
         self.is_equipped = False

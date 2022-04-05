@@ -5,6 +5,9 @@ from dune_rogue.render.color import Color, WHITE_COLOR
 from dune_rogue.render.glyph import Glyph
 
 
+DEFAULT_PLAYER_STATS = PlayerStats(15, 1, 2, 15)
+
+
 class PlayerCharacter(CharacterEntity):
     """Player character class"""
     def __init__(self, x, y):
@@ -14,7 +17,7 @@ class PlayerCharacter(CharacterEntity):
         """
         super().__init__(x, y, is_friendly=True,
                          glyph=Glyph('@', WHITE_COLOR),
-                         inventory=Inventory(60), stats=PlayerStats(15, 1, 2, 15))
+                         inventory=Inventory(60), stats=DEFAULT_PLAYER_STATS)
 
     def update(self, mediator):
         """Performs entity action

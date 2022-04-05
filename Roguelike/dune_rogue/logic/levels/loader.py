@@ -20,10 +20,3 @@ class LevelLoader:
         """
         self.current_level += 1
         return Level(self.levels_dir + f'level_{self.current_level}.lvl', player)
-
-
-if __name__ == '__main__':
-    loader = LevelLoader()
-    lvl = loader.load_next_from_file(EntityFactory.create_player_character(0, 0))
-    txt, _ = lvl.render()
-    print(txt)

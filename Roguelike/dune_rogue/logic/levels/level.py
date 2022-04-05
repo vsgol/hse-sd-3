@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.levels.mediator import LevelMediator
 from dune_rogue.render.scene import Scene
 
 _STATIC_ENTITY_MAPPING = {
@@ -32,9 +33,12 @@ class Level(Scene):
         return text, colors
 
     def process_input(self, action):
-        # Process player input
+        # TODO: Process player input
+        mediator = LevelMediator(self)
         for ent in self.acting_entities:
-            ent.upadte()
+            ent.update(mediator)
+        if self.player.x == self.finish_coord[0] and self.player.y == self.finish_coord[1]:
+            self.is_finished = True
 
     def __init__(self, load_file, player):
         """
@@ -65,6 +69,8 @@ class Level(Scene):
                 ent_symbols = file.readline()
                 for j in range(w):
                     ent_row.append(_STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
+                    if ent_symbols[j] == 'X':
+                        self.finish_coord = (j, i)
                 self.static_entities.append(ent_row)
             n_acting = int(file.readline())
 
@@ -74,9 +80,8 @@ class Level(Scene):
                 if ent_symbol == '@':
                     self.player.x = x
                     self.player.y = y
+                    self.acting_entities.append(self.player)
                 else:
-                    if ent_symbol == 'X':
-                        self.finish_coord = (x, y)
                     self.acting_entities.append(_ACTING_ENTITY_MAPPING[ent_symbol](x, y))
 
     def __str__(self):

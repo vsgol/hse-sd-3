@@ -2,7 +2,8 @@ class Inventory:
     """Inventory class"""
     def __check(self):
         """Checks whether inventory is valid"""
-        assert self.weight <= self.capacity
+        if self.weight > self.capacity:
+            raise RuntimeError('Inventory is overloaded')
 
     def __init__(self, capacity, items=None):
         """
@@ -31,13 +32,21 @@ class Inventory:
         :argument item: item to be added
         """
         self.weight += item.weight
-        self.__check()
+        try:
+            self.__check()
+        except RuntimeError as e:
+            self.weight -= item.weight
+            raise e
         self.items.append(item)
 
     def remove_item(self, item_id):
         """Removes item from the inventory
         :param item_id: item id in the inventory
         """
-        self.weight -= self.items[item_id]
-        self.__check()
+        self.weight -= self.items[item_id].weight
+        try:
+            self.__check()
+        except RuntimeError as e:
+            self.weight += self.items[item_id].weight
+            raise e
         del self.items[item_id]
