@@ -96,3 +96,7 @@ class PlayerStats(CharacterStats):
         self.max_hp += 1
         self.attack += 1
         self.defence += 1
+
+    def __str__(self):
+        return f'HP: {self.hp}/{self.max_hp} ATK: {self.attack} DEF: {self.defence}' \
+               f' LVL: {self.level} EXP: {self.exp}/{_LVL_PROGRESSION[self.level]}'

@@ -3,7 +3,10 @@ from pathlib import Path
 
 from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.logic.levels.mediator import LevelMediator
+from dune_rogue.render.color import WHITE_COLOR
 from dune_rogue.render.scene import Scene
+from dune_rogue.logic.actions import Action
+from dune_rogue.logic.states import State
 
 _STATIC_ENTITY_MAPPING = {
     '#': EntityFactory.create_wall,
@@ -30,15 +33,27 @@ class Level(Scene):
             text[ent.y][ent.x] = ent.glyph.symbol
             colors[ent.y][ent.x] = ent.glyph.color
         text[self.player.y][self.player.x] = self.player.glyph.symbol
-        return text, colors
+
+        stats_text = str(self.player.stats)
+        return [[text], [[stats_text]]], [[colors], [[[WHITE_COLOR] * len(stats_text)]]]
 
     def process_input(self, action):
-        # TODO: Process player input
         mediator = LevelMediator(self)
+
+        if action in [Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT]:
+            target_coord = (
+                    self.player.x - (action == Action.MOVE_LEFT) + (action == Action.MOVE_RIGHT),
+                    self.player.y - (action == Action.MOVE_UP) + (action == Action.MOVE_DOWN)
+            )
+            if not mediator.get_entity_at(target_coord[0], target_coord[1]).is_solid:
+                self.player.x, self.player.y = target_coord
+        elif action == Action.TOGGLE_PAUSE:
+            return State.PAUSE_MENU
         for ent in self.acting_entities:
             ent.update(mediator)
         if self.player.x == self.finish_coord[0] and self.player.y == self.finish_coord[1]:
             self.is_finished = True
+        return State.LEVEL
 
     def __init__(self, load_file, player):
         """

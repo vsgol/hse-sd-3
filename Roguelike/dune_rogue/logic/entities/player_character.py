@@ -16,7 +16,7 @@ class PlayerCharacter(CharacterEntity):
         :param y: y coordinate
         """
         super().__init__(x, y, is_friendly=True,
-                         glyph=Glyph('@', WHITE_COLOR),
+                         glyph=Glyph('@', Color(155, 155, 155)),
                          inventory=Inventory(60), stats=DEFAULT_PLAYER_STATS)
 
     def update(self, mediator):

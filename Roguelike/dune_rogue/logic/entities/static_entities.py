@@ -39,4 +39,4 @@ class LevelFinishEntity(StaticEntity):
         :param x: x coordinate
         :param y: y coordinate
         """
-        super().__init__(x, y, is_solid=False, glyph=Glyph(symbol='X', color=WHITE_COLOR))
+        super().__init__(x, y, is_solid=False, glyph=Glyph(symbol='X', color=Color(255, 0, 0)))
