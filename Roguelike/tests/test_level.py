@@ -39,15 +39,9 @@ class LevelTest(unittest.TestCase):
 
     def test_render(self):
         text, colors = LevelTest.level_1.render()
-        self.assertEqual(text, [['#', '#', '#', '#'], ['#', '@', ' ', '#'], ['#', ' ', 'X', '#'], ['#', '#', '#', '#']])
-        for i in range(4):
-            for j in range(4):
-                if text[i][j] == ' ':
-                    continue
-                color = colors[i][j]
-                self.assertEqual(color.R, 255)
-                self.assertEqual(color.G, 255)
-                self.assertEqual(color.B, 255)
+        self.assertEqual(text,
+                         [[[['#', '#', '#', '#'], ['#', '@', ' ', '#'], ['#', ' ', 'X', '#'], ['#', '#', '#', '#']]],
+                          [[str(LevelTest.level_1.player.stats)]]])
 
 
 if __name__ == '__main__':
