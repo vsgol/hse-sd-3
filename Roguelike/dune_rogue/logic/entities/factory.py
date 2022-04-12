@@ -1,3 +1,4 @@
+from dune_rogue.logic.entities.npcs.cielago import Cielago
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.entities.static_entities import WallEntity, FloorEntity, LevelFinishEntity
 
@@ -39,3 +40,7 @@ class EntityFactory:
         :return: Initialized finish entity
         """
         return LevelFinishEntity(x, y)
+
+    @staticmethod
+    def create_cielago(x, y):
+        return Cielago(x, y)

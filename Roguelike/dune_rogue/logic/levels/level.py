@@ -15,6 +15,7 @@ _STATIC_ENTITY_MAPPING = {
 }
 
 _ACTING_ENTITY_MAPPING = {
+    'c': EntityFactory.create_cielago,
     # '@': EntityFactory.create_player_character
 }
 
