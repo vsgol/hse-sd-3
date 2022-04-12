@@ -1,4 +1,5 @@
 import random
+from collections import deque
 
 from dune_rogue.logic.ai.behavior import Behavior
 from dune_rogue.logic.ai.random import RandomBehavior
@@ -17,12 +18,13 @@ class AggressiveBehavior(Behavior):
         priority[y_entity][x_entity] = -1
         visited[y_player][x_player] = True
         discount = 0.99
+        reached_entity = False
 
-        queue = [(x_player, y_player)]
-
+        queue = deque()
+        queue.append((x_player, y_player))
         while len(queue) > 0:
             x, y = queue[0]
-            queue = queue[1:]
+            queue.popleft()
 
             for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 x_new = x + dx
@@ -32,7 +34,10 @@ class AggressiveBehavior(Behavior):
                     continue
                 priority[y_new][x_new] = priority[y][x] * discount
                 visited[y][x] = True
-                queue.append((x_new, y_new))
+                if y_new == y_entity and x_new == x_entity:
+                    reached_entity = True
+                if not reached_entity:
+                    queue.append((x_new, y_new))
 
         return priority
 
@@ -50,20 +55,24 @@ class AggressiveBehavior(Behavior):
 
         priority = self.build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator)
         max_p = 0
+        candidates = []
         for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
             x, y, = x_entity + dx, y_entity + dy
             if w > x >= 0 and h > y >= 0:
                 p = priority[y][x]
-                if max_p < p and (x == x_entity and abs(y - y_entity) <= 1 or y == y_entity and abs(x - x_entity) <= 1):
-                    max_p = p
-                    new_x, new_y = x, y
-
+                if max_p <= p and (x == x_entity and abs(y - y_entity) <= 1 or y == y_entity and abs(x - x_entity) <= 1):
+                    if max_p == p:
+                        candidates.append((x, y))
+                    else:
+                        max_p = p
+                        candidates = [(x, y)]
+        new_x, new_y = random.choice(candidates)
         self.move_to_cell(entity, mediator, new_x, new_y)
 
 
 if __name__ == '__main__':
-    x_player = 2
-    y_player = 2
+    x_player = 0
+    y_player = 0
     class DummyEnt:
         is_solid = False
     class DummyMed:
