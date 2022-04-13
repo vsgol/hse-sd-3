@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.npcs.npc import Enemy
 from dune_rogue.logic.levels.mediator import LevelMediator
 from dune_rogue.render.color import WHITE_COLOR
 from dune_rogue.render.scene import Scene
@@ -38,6 +39,13 @@ class Level(Scene):
         stats_text = str(self.player.stats)
         return [[text], [[stats_text]]], [[colors], [[[WHITE_COLOR] * len(stats_text)]]]
 
+    def filter_entities(self):
+        dead = list(filter(lambda e: not e.is_alive, self.acting_entities))
+        for ent in dead:
+            if isinstance(ent, Enemy):
+                self.player.stats.give_exp(ent.exp)
+        self.acting_entities = list(filter(lambda e: e.is_alive, self.acting_entities))
+
     def process_input(self, action):
         mediator = LevelMediator(self)
 
@@ -46,12 +54,23 @@ class Level(Scene):
                     self.player.x - (action == Action.MOVE_LEFT) + (action == Action.MOVE_RIGHT),
                     self.player.y - (action == Action.MOVE_UP) + (action == Action.MOVE_DOWN)
             )
-            if not mediator.get_entity_at(target_coord[0], target_coord[1]).is_solid:
+            intersect_entity = mediator.get_entity_at(target_coord[0], target_coord[1])
+            if not intersect_entity.is_solid:
                 self.player.x, self.player.y = target_coord
+            self.player.intersect(intersect_entity)
         elif action == Action.TOGGLE_PAUSE:
             return State.PAUSE_MENU
-        for ent in self.acting_entities:
+
+        if not self.player.is_alive:
+            return State.MAIN_MENU
+
+        self.filter_entities()
+        for i, ent in enumerate(self.acting_entities):
             ent.update(mediator)
+            if not self.player.is_alive:
+                return State.MAIN_MENU
+        self.filter_entities()
+
         if self.player.x == self.finish_coord[0] and self.player.y == self.finish_coord[1]:
             self.is_finished = True
         return State.LEVEL

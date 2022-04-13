@@ -14,7 +14,6 @@ class Behavior(ABC):
         target = mediator.get_entity_at(x_new, y_new)
 
         entity.intersect(target)
-        target.intersect(entity)
 
         if not isinstance(target, PlayerCharacter):
             entity.x = x_new

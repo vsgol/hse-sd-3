@@ -81,6 +81,7 @@ class GameControl:
 
                 # Starting new game
                 if self.state == State.MAIN_MENU and new_state == State.LEVEL:
+                    self.player = EntityFactory().create_player_character(0, 0)
                     self.level_loader.reset()
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
