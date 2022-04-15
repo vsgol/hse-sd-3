@@ -7,6 +7,7 @@ from dune_rogue.logic.ai.random import RandomBehavior
 
 
 class CowardBehavior(AggressiveBehavior):
+    """Entity escapes for player when player near enough"""
     def __init__(self, radius=25):
         super().__init__(radius)
 

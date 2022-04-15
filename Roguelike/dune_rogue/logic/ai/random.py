@@ -4,6 +4,7 @@ from dune_rogue.logic.ai.behavior import Behavior
 
 
 class RandomBehavior(Behavior):
+    """Move entity to the random available position"""
     def __init__(self):
         super().__init__()
 

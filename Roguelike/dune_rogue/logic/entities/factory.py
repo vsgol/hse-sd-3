@@ -50,20 +50,45 @@ class EntityFactory:
 
     @staticmethod
     def create_cielago(x, y):
+        """Created cielago entity
+        :argument x: Entity x coordinate
+        :argument y: Entity y coordinate
+        :return: Initialized cielago entity
+        """
         return Cielago(x, y)
 
     @staticmethod
     def create_mouse(x, y):
+        """Created kangaroo mouse entity
+        :argument x: Entity x coordinate
+        :argument y: Entity y coordinate
+        :return: Initialized kangaroo mouse entity
+        """
         return KangarooMouse(x, y)
 
     @staticmethod
     def create_fox(x, y):
+        """Created kit fox entity
+        :argument x: Entity x coordinate
+        :argument y: Entity y coordinate
+        :return: Initialized kit fox entity
+        """
         return KitFox(x, y)
 
     @staticmethod
     def create_unfixed_crys(x, y):
+        """Created unfixed crysknife entity
+        :argument x: Entity x coordinate
+        :argument y: Entity y coordinate
+        :return: Initialized unfixed crysknife entity
+        """
         return UnfixedCrysknifeEntity(x, y)
 
     @staticmethod
     def create_worn_stillsuit(x, y):
+        """Created unfixed worn stillsuit entity
+        :argument x: Entity x coordinate
+        :argument y: Entity y coordinate
+        :return: Initialized worn stillsuit entity
+        """
         return WornStillsuitEntity(x, y)

@@ -42,6 +42,9 @@ class InventoryItem:
         self.is_equipped = False
 
     def get_bonuses_str(self):
+        """Text representation of bonuses by item
+        :return: Text representation on non-zero bonuses
+        """
         bonuses = []
 
         for name, bonus in [

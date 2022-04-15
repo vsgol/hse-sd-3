@@ -5,5 +5,6 @@ from dune_rogue.render.glyph import Glyph
 
 
 class UnfixedCrysknifeEntity(ItemEntity):
+    """Unfixed crysknife entity"""
     def __init__(self, x, y):
         super().__init__(x, y, glyph=Glyph('|', Color(255, 255, 200)), item=UnfixedCrysknife())

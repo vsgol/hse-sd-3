@@ -3,6 +3,7 @@ from dune_rogue.logic.entities.player_character import PlayerCharacter
 
 
 class PassiveBehavior(Behavior):
+    """Entity stays at its position and attacks player if it can"""
     def __init__(self):
         super().__init__()
 

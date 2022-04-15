@@ -43,6 +43,9 @@ class PlayerCharacter(CharacterEntity):
                 other.behavior = Confused(other.behavior)
 
     def equip_item(self, item):
+        """Equip item
+        :argument item: argument to be equipped
+        """
         if isinstance(item, Weapon):
             if self.weapon:
                 self.unequip_item(self.weapon)
@@ -55,6 +58,9 @@ class PlayerCharacter(CharacterEntity):
         item.equip()
 
     def unequip_item(self, item):
+        """Unequip item
+        :argument item: argument to be unequipped
+        """
         if item is self.weapon:
             self.weapon = None
         elif item is self.armor:

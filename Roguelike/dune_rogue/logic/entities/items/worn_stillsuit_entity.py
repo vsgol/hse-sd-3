@@ -5,5 +5,6 @@ from dune_rogue.render.glyph import Glyph
 
 
 class WornStillsuitEntity(ItemEntity):
+    """Worn stillsuit entity"""
     def __init__(self, x, y):
         super().__init__(x, y, glyph=Glyph('&', Color(200, 185, 130)), item=WornStillsuit())

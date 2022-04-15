@@ -6,12 +6,26 @@ from dune_rogue.logic.ai.random import RandomBehavior
 
 
 class AggressiveBehavior(Behavior):
+    """Entity seeks for player to attack if player near enough"""
     def __init__(self, radius=25):
+        """
+        :param radius: radius in which entity will chase player
+        """
         super().__init__()
         self.radius = radius
 
     @staticmethod
     def build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator):
+        """ Assigns priority to all positions where player is the best target and value decreases exponentially
+        with distance increase
+        :argument w: level width
+        :argument h: level height
+        :argument x_player: player x coordinate
+        :argument y_player: player y coordinate
+        :argument x_entity: entity x coordinate
+        :argument y_entity: entity y coordinate
+        :argument mediator: level mediator
+        """
         priority = [[-2.0] * w for _ in range(h)]
         visited = [[False] * w for _ in range(h)]
         priority[y_player][x_player] = 1.0
