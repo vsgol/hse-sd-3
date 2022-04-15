@@ -12,4 +12,6 @@ class Action(Enum):
     TOGGLE_INVENTORY = 5
     TOGGLE_PAUSE = 6
     SELECT = 7
+    # Other
+    PICK_PUT = 8  # pick or drop item
 

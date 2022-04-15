@@ -3,6 +3,7 @@ from pathlib import Path
 
 from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
 from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.items.item_entity import ItemEntity
 from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
 from dune_rogue.render.color import WHITE_COLOR
@@ -21,6 +22,7 @@ _ACTING_ENTITY_MAPPING = {
     'm': EntityFactory.create_mouse,
     'f': EntityFactory.create_fox,
     '|': EntityFactory.create_unfixed_crys,
+    '&': EntityFactory.create_worn_stillsuit,
     # '@': EntityFactory.create_player_character
 }
 
@@ -70,6 +72,12 @@ class Level(Scene):
             return State.PAUSE_MENU
         elif action == Action.TOGGLE_INVENTORY:
             return State.INVENTORY
+        elif action == Action.PICK_PUT:
+            for i, ent in enumerate(self.acting_entities[::-1]):
+                if isinstance(ent, ItemEntity) and ent.x == self.player.x and ent.y == self.player.y:
+                    self.player.inventory.add_item(ent.item)
+                    del self.acting_entities[-i - 1]
+                    break
 
         if not self.player.is_alive:
             return State.MAIN_MENU

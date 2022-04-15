@@ -24,8 +24,8 @@ class GameControl:
         self.level_selection = LvlSelectMenu(self.level_loader)
         self.err_msg = ErrorMsg(State.MAIN_MENU)
         self.player = EntityFactory().create_player_character(0, 0)
-        self.inventory = InventoryMenu(self.player)
         self.level = None
+        self.inventory = InventoryMenu(self.player, self.level)
         self.drawer = drawer
         self.input_handler = drawer.input_handler
         self.state = State.MAIN_MENU
@@ -56,6 +56,7 @@ class GameControl:
             self.level_loader = load_pkl(self.save_loader)
             self.level_selection.loader = self.level_loader
             self.player = self.level.player
+            self.inventory = InventoryMenu(self.player, self.level)
         except:
             return False
         return True
@@ -75,6 +76,7 @@ class GameControl:
                 if self.level and self.level.is_finished:
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
+                        self.inventory = InventoryMenu(self.player, self.level)
                     except:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
@@ -84,19 +86,19 @@ class GameControl:
                 # Starting new game
                 if self.state == State.MAIN_MENU and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
-                    self.inventory = InventoryMenu(self.player)
                     self.level_loader.reset()
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
+                        self.inventory = InventoryMenu(self.player, self.level)
                     except:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
                 # Loading selected level
                 elif self.state == State.LEVEL_SELECTION and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
-                    self.inventory = InventoryMenu(self.player)
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
+                        self.inventory = InventoryMenu(self.player, self.level)
                     except Exception as e:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.LEVEL_SELECTION)

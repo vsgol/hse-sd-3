@@ -13,7 +13,9 @@ class Stats:
         self.max_hp = max_hp
 
     def __add__(self, other):
-        return Stats(self.hp + other.hp, self.defence + other.defence, self.attack + other.attack,
+        return Stats(min(self.hp + other.hp, self.max_hp + other.max_hp),
+                     self.defence + other.defence,
+                     self.attack + other.attack,
                      self.max_hp + other.max_hp)
 
     def __neg__(self):

@@ -3,6 +3,7 @@ import random
 from dune_rogue.logic.ai.status_effects.confused import Confused
 from dune_rogue.logic.entities.acting_entity import CharacterEntity
 from dune_rogue.logic.inventory import Inventory
+from dune_rogue.logic.items.armors.armor import Armor
 from dune_rogue.logic.items.weapons.weapon import Weapon
 from dune_rogue.logic.stats import PlayerStats
 from dune_rogue.render.color import Color, WHITE_COLOR
@@ -25,6 +26,7 @@ class PlayerCharacter(CharacterEntity):
                          inventory=Inventory(60), stats=DEFAULT_PLAYER_STATS())
         self.is_player = True
         self.weapon = None
+        self.armor = None
 
     def update(self, mediator):
         """Performs entity action
@@ -45,11 +47,17 @@ class PlayerCharacter(CharacterEntity):
             if self.weapon:
                 self.unequip_item(self.weapon)
             self.weapon = item
-            self.stats.add_stats(item.get_bonuses())
-            item.equip()
+        elif isinstance(item, Armor):
+            if self.armor:
+                self.unequip_item(self.armor)
+            self.armor = item
+        self.stats.add_stats(item.get_bonuses())
+        item.equip()
 
     def unequip_item(self, item):
         if item is self.weapon:
             self.weapon = None
-            self.stats.remove_stats(item.get_bonuses())
-            item.unequip()
+        elif item is self.armor:
+            self.armor = None
+        self.stats.remove_stats(item.get_bonuses())
+        item.unequip()
