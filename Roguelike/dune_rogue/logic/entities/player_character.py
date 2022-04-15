@@ -1,10 +1,15 @@
+import random
+
+from dune_rogue.logic.ai.status_effects.confused import Confused
 from dune_rogue.logic.entities.acting_entity import CharacterEntity
 from dune_rogue.logic.inventory import Inventory
+from dune_rogue.logic.items.weapons.weapon import Weapon
 from dune_rogue.logic.stats import PlayerStats
 from dune_rogue.render.color import Color, WHITE_COLOR
 from dune_rogue.render.glyph import Glyph
 
-DEFAULT_PLAYER_STATS = lambda: PlayerStats(15, 1, 2, 15)
+DEFAULT_PLAYER_STATS = lambda: PlayerStats(15, 1, 1, 15)
+CONFUSE_CHANCE = 0.25
 
 
 class PlayerCharacter(CharacterEntity):
@@ -18,6 +23,8 @@ class PlayerCharacter(CharacterEntity):
         super().__init__(x, y, is_friendly=True,
                          glyph=Glyph('@', Color(155, 155, 155)),
                          inventory=Inventory(60), stats=DEFAULT_PLAYER_STATS())
+        self.is_player = True
+        self.weapon = None
 
     def update(self, mediator):
         """Performs entity action
@@ -30,3 +37,19 @@ class PlayerCharacter(CharacterEntity):
     def intersect(self, other):
         if isinstance(other, CharacterEntity) and not other.is_friendly:
             other.make_damage(self.stats.attack)
+            if random.random() < CONFUSE_CHANCE:
+                other.behavior = Confused(other.behavior)
+
+    def equip_item(self, item):
+        if isinstance(item, Weapon):
+            if self.weapon:
+                self.unequip_item(self.weapon)
+            self.weapon = item
+            self.stats.add_stats(item.get_bonuses())
+            item.equip()
+
+    def unequip_item(self, item):
+        if item is self.weapon:
+            self.weapon = None
+            self.stats.remove_stats(item.get_bonuses())
+            item.unequip()

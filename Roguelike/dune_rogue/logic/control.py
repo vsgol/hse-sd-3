@@ -4,6 +4,7 @@ from pathlib import Path
 from dune_rogue.logic.levels.loader import LevelLoader
 from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.logic.states import State
+from dune_rogue.render.menus.inventory_menu import InventoryMenu
 from dune_rogue.render.menus.main_menu import MainMenu
 from dune_rogue.render.menus.pause_menu import PauseMenu
 from dune_rogue.render.menus.lvl_select_menu import LvlSelectMenu
@@ -23,6 +24,7 @@ class GameControl:
         self.level_selection = LvlSelectMenu(self.level_loader)
         self.err_msg = ErrorMsg(State.MAIN_MENU)
         self.player = EntityFactory().create_player_character(0, 0)
+        self.inventory = InventoryMenu(self.player)
         self.level = None
         self.drawer = drawer
         self.input_handler = drawer.input_handler
@@ -82,6 +84,7 @@ class GameControl:
                 # Starting new game
                 if self.state == State.MAIN_MENU and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
+                    self.inventory = InventoryMenu(self.player)
                     self.level_loader.reset()
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
@@ -91,11 +94,13 @@ class GameControl:
                 # Loading selected level
                 elif self.state == State.LEVEL_SELECTION and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
+                    self.inventory = InventoryMenu(self.player)
                     try:
                         self.level = self.level_loader.load_next_from_file(self.player)
-                    except:
+                    except Exception as e:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.LEVEL_SELECTION)
+                        self.err_msg.title = repr(e)
                 # Exiting to main menu and trying to save game
                 elif self.state == State.PAUSE_MENU and new_state == State.MAIN_MENU:
                     if self.save_game():
@@ -133,6 +138,8 @@ class GameControl:
                     self.current_scene = self.level_selection
                 elif new_state == State.ERR:
                     self.current_scene = self.err_msg
+                elif new_state == State.INVENTORY:
+                    self.current_scene = self.inventory
                 elif new_state == State.EXIT:
                     break
 

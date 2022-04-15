@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
 
+from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
 from dune_rogue.logic.entities.factory import EntityFactory
-from dune_rogue.logic.entities.npcs.npc import Enemy
+from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
 from dune_rogue.render.color import WHITE_COLOR
 from dune_rogue.render.scene import Scene
@@ -17,6 +18,9 @@ _STATIC_ENTITY_MAPPING = {
 
 _ACTING_ENTITY_MAPPING = {
     'c': EntityFactory.create_cielago,
+    'm': EntityFactory.create_mouse,
+    'f': EntityFactory.create_fox,
+    '|': EntityFactory.create_unfixed_crys,
     # '@': EntityFactory.create_player_character
 }
 
@@ -25,16 +29,20 @@ class Level(Scene):
     """Level class"""
     def render(self):
         text = list(map(lambda ents: list(map(str, ents)), self.static_entities))
-        colors = []
+        colors = [[WHITE_COLOR] * self.w for _ in range(self.h)]
+        solid = [[False] * self.w for _ in range(self.h)]
         for i in range(self.h):
-            row = []
             for j in range(self.w):
-                row.append(self.static_entities[i][j].glyph.color)
-            colors.append(row)
+                colors[i][j] = self.static_entities[i][j].glyph.color
+                solid[i][j] = self.static_entities[i][j].is_solid
+
         for ent in self.acting_entities:
-            text[ent.y][ent.x] = ent.glyph.symbol
-            colors[ent.y][ent.x] = ent.glyph.color
+            if not solid[ent.y][ent.x]:
+                solid[ent.y][ent.x] = ent.is_solid
+                text[ent.y][ent.x] = ent.glyph.symbol
+                colors[ent.y][ent.x] = ent.glyph.color
         text[self.player.y][self.player.x] = self.player.glyph.symbol
+        colors[self.player.y][self.player.x] = self.player.glyph.color
 
         stats_text = str(self.player.stats)
         return [[text], [[stats_text]]], [[colors], [[[WHITE_COLOR] * len(stats_text)]]]
@@ -60,6 +68,8 @@ class Level(Scene):
             self.player.intersect(intersect_entity)
         elif action == Action.TOGGLE_PAUSE:
             return State.PAUSE_MENU
+        elif action == Action.TOGGLE_INVENTORY:
+            return State.INVENTORY
 
         if not self.player.is_alive:
             return State.MAIN_MENU
@@ -70,6 +80,13 @@ class Level(Scene):
             if not self.player.is_alive:
                 return State.MAIN_MENU
         self.filter_entities()
+
+        for ent in self.acting_entities:
+            if isinstance(ent, NPC):
+                if isinstance(ent.behavior, StatusEffect):
+                    ent.behavior.purify_others()
+                    if ent.behavior.duration <= 0:
+                        ent.behavior = ent.behavior.behavior
 
         if self.player.x == self.finish_coord[0] and self.player.y == self.finish_coord[1]:
             self.is_finished = True

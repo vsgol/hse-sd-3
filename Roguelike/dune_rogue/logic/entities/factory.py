@@ -1,6 +1,10 @@
+from dune_rogue.logic.entities.items.unfixed_crysknife_entity import UnfixedCrysknifeEntity
 from dune_rogue.logic.entities.npcs.cielago import Cielago
+from dune_rogue.logic.entities.npcs.kangaroo_mouse import KangarooMouse
+from dune_rogue.logic.entities.npcs.kit_fox import KitFox
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.entities.static_entities import WallEntity, FloorEntity, LevelFinishEntity
+from dune_rogue.logic.items.weapons.unfixed_crysknife import UnfixedCrysknife
 
 
 class EntityFactory:
@@ -12,7 +16,10 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized character entity
         """
-        return PlayerCharacter(x, y)
+        player = PlayerCharacter(x, y)
+        # player.inventory.add_item(UnfixedCrysknife())
+        # player.inventory.add_item(UnfixedCrysknife())
+        return player
 
     @staticmethod
     def create_wall(x, y):
@@ -44,3 +51,15 @@ class EntityFactory:
     @staticmethod
     def create_cielago(x, y):
         return Cielago(x, y)
+
+    @staticmethod
+    def create_mouse(x, y):
+        return KangarooMouse(x, y)
+
+    @staticmethod
+    def create_fox(x, y):
+        return KitFox(x, y)
+
+    @staticmethod
+    def create_unfixed_crys(x, y):
+        return UnfixedCrysknifeEntity(x, y)

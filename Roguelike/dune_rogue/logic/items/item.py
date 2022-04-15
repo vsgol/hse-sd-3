@@ -38,3 +38,20 @@ class InventoryItem:
         if not self.is_equipped:
             raise RuntimeError('Unequipping unequipped item')
         self.is_equipped = False
+
+    def get_bonuses_str(self):
+        bonuses = []
+
+        for name, bonus in [
+            ('HP: ', self.stats.hp),
+            ('DEF: ', self.stats.defence),
+            ('ATK: ', self.stats.attack),
+            ('MAX_HP: ', self.stats.max_hp),
+        ]:
+            if bonus != 0:
+                if bonus > 0:
+                    name += f'+{bonus}'
+                else:
+                    name += f'{bonus}'
+                bonuses.append(name)
+        return ' '.join(bonuses)

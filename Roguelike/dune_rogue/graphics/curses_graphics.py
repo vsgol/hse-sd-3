@@ -41,11 +41,10 @@ class Drawer:
 
         for n, row in enumerate(symbols_frame):
             x_max_prev = 0
+            cur_y_max = 0
             for m, col in enumerate(row):
                 colors = colors_frame[n][m]
-
                 cur_x_max = 0
-                cur_y_max = 0
 
                 for i, r in enumerate(col):
                     for j, c in enumerate(r):
@@ -66,6 +65,6 @@ class Drawer:
                         cur_x_max = max(cur_x_max, j)
                     cur_y_max = max(cur_y_max, i)
                 x_max_prev = max(x_max_prev, cur_x_max + 2)
-                y_max_prev = max(y_max_prev, cur_y_max + 2)
+            y_max_prev += cur_y_max + 2
 
         self.stdscr.refresh()

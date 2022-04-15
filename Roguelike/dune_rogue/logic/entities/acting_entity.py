@@ -29,6 +29,8 @@ class CharacterEntity(ActingEntity, ABC):
         """Processes incoming damage
         :argument damage: amount of damage received
         """
+        if damage == 0:
+            return
         if self.stats.defence >= damage:
             diff = min(9, self.stats.defence - damage)
             if random.randint(1, 10) > diff:
