@@ -70,18 +70,13 @@ class InventoryMenu(Menu):
         elif action == Action.TOGGLE_INVENTORY:
             return State.LEVEL
         elif action == Action.SELECT:
-            if len(self.player.inventory.items) != 0:
-                selected_item = self.player.inventory.items[self.selected_option]
-                if selected_item.can_be_equipped:
-                    if not selected_item.is_equipped:
-                        self.player.equip_item(selected_item)
-                    else:
-                        self.player.unequip_item(selected_item)
+            self.process_select()
         elif action == Action.PICK_PUT:
             if len(self.player.inventory.items) != 0:
                 selected_item = self.player.inventory.items[self.selected_option]
                 if selected_item.is_equipped:
                     self.player.unequip_item(selected_item)
+
                 self.level.acting_entities.append(_ITEM_TO_ENTITY_FUNC[type(selected_item)](self.player.x, self.player.y))
                 self.player.inventory.remove_item(self.selected_option)
 
@@ -95,5 +90,10 @@ class InventoryMenu(Menu):
         self.selected_option = 0
 
     def process_select(self):
-        """Processes option selecting"""
-        raise NotImplementedError('process_select function is not implemented')
+        if len(self.player.inventory.items) != 0:
+            selected_item = self.player.inventory.items[self.selected_option]
+            if selected_item.can_be_equipped:
+                if not selected_item.is_equipped:
+                    self.player.equip_item(selected_item)
+                else:
+                    self.player.unequip_item(selected_item)

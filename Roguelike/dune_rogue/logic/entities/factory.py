@@ -19,6 +19,7 @@ class EntityFactory:
         :return: Initialized character entity
         """
         player = PlayerCharacter(x, y)
+        # player.inventory.add_item(UnfixedCrysknife())
         return player
 
     @staticmethod

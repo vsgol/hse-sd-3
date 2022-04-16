@@ -13,7 +13,7 @@ class Stats:
         self.max_hp = max_hp
 
     def __add__(self, other):
-        return Stats(min(self.hp + other.hp, self.max_hp + other.max_hp),
+        return Stats(self.hp + other.hp,
                      self.defence + other.defence,
                      self.attack + other.attack,
                      self.max_hp + other.max_hp)
@@ -26,6 +26,10 @@ class Stats:
 
     def __repr__(self):
         return f'hp: {self.hp}, defence: {self.defence}, attack: {self.attack}, max hp: {self.max_hp}'
+
+    def __eq__(self, other):
+        return self.hp == other.hp and self.attack == other.attack \
+               and self.defence == other.defence and self.max_hp == other.max_hp
 
 
 class CharacterStats(Stats):

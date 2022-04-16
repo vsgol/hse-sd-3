@@ -1,8 +1,19 @@
+import os
+import random
 import unittest
+from copy import deepcopy
+from pathlib import Path
 
 from dune_rogue.logic.actions import Action
+from dune_rogue.logic.entities.acting_entity import ActingEntity
+from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.player_character import PlayerCharacter
+from dune_rogue.logic.items.item import InventoryItem
+from dune_rogue.logic.levels.level import Level
 from dune_rogue.logic.states import State
+from dune_rogue.logic.stats import Stats
 from dune_rogue.render.menus.error_message import ErrorMsg
+from dune_rogue.render.menus.inventory_menu import InventoryMenu, _ITEM_TO_ENTITY_FUNC
 from dune_rogue.render.menus.lvl_select_menu import LvlSelectMenu
 from dune_rogue.render.menus.main_menu import MainMenu
 from dune_rogue.render.menus.pause_menu import PauseMenu
@@ -11,7 +22,7 @@ from dune_rogue.render.menus.simple_menu import SimpleMenu
 
 class MenusTest(unittest.TestCase):
     def check_neutral(self, menu, pause=False):
-        for action in [Action.MOVE_LEFT, Action.MOVE_RIGHT, Action.TOGGLE_INVENTORY] + \
+        for action in [Action.MOVE_LEFT, Action.MOVE_RIGHT, Action.TOGGLE_INVENTORY, Action.PICK_PUT] + \
                       ([Action.TOGGLE_PAUSE] if not pause else []):
             self.assertEqual(menu.process_input(action), menu.menu_state)
             self.assertEqual(menu.selected_option, 0)
@@ -95,6 +106,58 @@ class MenusTest(unittest.TestCase):
         self.assertEqual(menu.process_input(Action.SELECT), State.MAIN_MENU)
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.PAUSE_MENU)
         self.assertEqual(menu.process_input(Action.TOGGLE_PAUSE), State.LEVEL)
+
+    def test_inventory(self):
+        player = PlayerCharacter(0, 0)
+        cwd = os.path.realpath(__file__)
+        path = Path(cwd)
+        levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
+        level = Level(levels_dir + 'level_1.lvl', player)
+        n_items = 10
+        menu = InventoryMenu(player, level)
+
+        random.seed(0)
+        for _ in range(n_items):
+            player.inventory.add_item(
+                InventoryItem(stats=Stats(*[random.randint(-5, 5) for _ in range(4)]), can_be_equipped=True))
+
+        class DummyEntity(ActingEntity):
+            def update(self, mediator):
+                pass
+
+        _ITEM_TO_ENTITY_FUNC[InventoryItem] = lambda x, y: DummyEntity(x, y, False, None)
+        stats_player = deepcopy(player.stats)
+
+        self.assertEqual(menu.selected_option, 0)
+
+        for action in [Action.MOVE_LEFT, Action.MOVE_RIGHT]:
+            self.assertEqual(menu.process_input(action), menu.menu_state)
+            self.assertEqual(menu.selected_option, 0)
+
+        for i in range(1, n_items * 3):
+            self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.INVENTORY)
+            self.assertEqual(menu.selected_option, i % n_items)
+            self.assertEqual(menu.process_input(Action.SELECT), State.INVENTORY)
+            self.assertEqual(player.stats, stats_player + player.inventory.items[i % n_items].stats)
+            self.assertEqual(menu.process_input(Action.SELECT), State.INVENTORY)
+            self.assertEqual(player.stats, stats_player)
+
+        menu.open()
+        self.assertEqual(menu.selected_option, 0)
+        for i in range(n_items * 3 - 1, -1, -1):
+            self.assertEqual(menu.process_input(Action.MOVE_UP), State.INVENTORY)
+            self.assertEqual(menu.selected_option, i % n_items)
+            self.assertEqual(menu.process_input(Action.SELECT), State.INVENTORY)
+            self.assertEqual(player.stats, stats_player + player.inventory.items[i % n_items].stats)
+            self.assertEqual(menu.process_input(Action.SELECT), State.INVENTORY)
+            self.assertEqual(player.stats, stats_player)
+
+        for i in range(1, n_items + 1):
+            self.assertEqual(menu.process_input(Action.PICK_PUT), State.INVENTORY)
+            self.assertEqual(len(player.inventory.items), n_items - i)
+            self.assertEqual(len(level.acting_entities), i + 1)
+        for ent in level.acting_entities:
+            self.assertEqual((player.x, player.y), (ent.x, ent.y))
 
 
 if __name__ == '__main__':
