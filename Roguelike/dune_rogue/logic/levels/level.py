@@ -1,4 +1,5 @@
 import os
+import random
 from pathlib import Path
 from random import randrange, shuffle
 
@@ -31,6 +32,9 @@ _MIN_ROOM_SIZE = 4
 _MAX_ROOM_SIZE = 10
 _MIN_ROOMS = 5
 _MAX_ROOMS = 10
+_MAX_ENTITIES = 15
+_MIN_ENTITIES = 4
+_MAX_ITEMS = 3
 _GEN_ITERS = 10
 
 
@@ -244,6 +248,27 @@ class Level(Scene):
         self.player.x = x_pos
         self.player.y = y_pos
         self.acting_entities.append(self.player)
+
+        mediator = LevelMediator(self)
+        n_entities = randrange(_MIN_ENTITIES, _MAX_ENTITIES)
+        n_items = 0
+
+        for _ in range(_GEN_ITERS):
+            for _ in range(n_entities):
+                if len(self.acting_entities) >= n_entities + 1:
+                    break
+
+                x_pos, y_pos = get_random_pos()
+                old_ent = mediator.get_entity_at(x_pos, y_pos)
+                if old_ent.is_solid:
+                    continue
+
+                ent = _ACTING_ENTITY_MAPPING[random.choice(list(_ACTING_ENTITY_MAPPING.keys()))](x_pos, y_pos)
+                if isinstance(ent, ItemEntity):
+                    if n_items >= _MAX_ITEMS:
+                        continue
+                    n_items += 1
+                self.acting_entities.append(ent)
 
     def __str__(self):
         field = list(map(lambda ents: ''.join(map(str, ents)), self.static_entities))
