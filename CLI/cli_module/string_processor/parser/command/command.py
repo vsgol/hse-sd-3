@@ -1,8 +1,10 @@
 import argparse
+import io
 import os
 import re
 import subprocess
 from abc import ABC, abstractmethod
+from contextlib import redirect_stderr
 
 SUCCESS_RETURN_CODE = 0
 FAILED_FILE_OPEN_RETURN_CODE = 1
@@ -388,9 +390,11 @@ class GrepCommand(Command):
         self.stderr = ''
 
         try:
-            args, remaining = self.parser.parse_known_args(self.args)
-        except argparse.ArgumentError as e:
-            self.stderr = f'Failed to parse grep arguments: {str(e)}'
+            f = io.StringIO()
+            with redirect_stderr(f):
+                args, remaining = self.parser.parse_known_args(self.args)
+        except:
+            self.stderr = f'Failed to parse grep arguments'
             self.return_code = FAILED_ARG_PARSE_RETURN_CODE
             return self.return_code
 
