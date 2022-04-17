@@ -1,10 +1,26 @@
 import os
+from abc import ABC
 from pathlib import Path
 
 from dune_rogue.logic.levels.level import Level
 
 
-class LevelLoader:
+class LevelBuilder(ABC):
+    """Abstract level builder class"""
+    def set_sizes(self, w, h):
+        """Set level sized before build"""
+        pass
+
+    def build(self, player):
+        """Builds level"""
+        raise NotImplementedError('build is not implemented')
+
+    def reset(self):
+        """Resets builder"""
+        pass
+
+
+class LevelLoader(LevelBuilder):
     """Loader for levels"""
     def __init__(self):
         cwd = os.path.realpath(__file__)
@@ -13,7 +29,7 @@ class LevelLoader:
         self.current_level = 0
         self.number_of_levels = len(os.listdir(self.levels_dir))
 
-    def load_next_from_file(self, player):
+    def build(self, player):
         """ Loads next level from file
         :argument player: player character
         :return: next level
@@ -26,3 +42,28 @@ class LevelLoader:
     def reset(self):
         """Start loading levels from the first"""
         self.current_level = 0
+
+
+class LevelGenerator(LevelBuilder):
+    def __init__(self):
+        self.w = None
+        self.h = None
+
+    def build(self, player):
+        if not self.w or not self.h:
+            raise ValueError('width and height must be set before generating level')
+
+        level = Level(None, player)
+        level.generate(self.w, self.h)
+
+        self.w = None
+        self.h = None
+
+        return level
+
+    def set_sizes(self, w, h):
+        if w <= 0 or h <= 0:
+            raise ValueError('width and height must be positive')
+        # + 1 because of edges
+        self.w = int(w) + 1
+        self.h = int(h) + 1

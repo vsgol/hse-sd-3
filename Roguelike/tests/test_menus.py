@@ -77,6 +77,8 @@ class MenusTest(unittest.TestCase):
 
         self.assertEqual(menu.process_input(Action.SELECT), State.LEVEL)
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.MAIN_MENU)
+        self.assertEqual(menu.process_input(Action.SELECT), State.DUNGEON)
+        self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.MAIN_MENU)
         self.assertEqual(menu.process_input(Action.SELECT), State.LEVEL_SELECTION)
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.MAIN_MENU)
         self.assertEqual(menu.process_input(Action.SELECT), State.LOAD)

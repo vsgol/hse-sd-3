@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
+from random import randrange
 
-from dune_rogue.logic.levels.loader import LevelLoader
+from dune_rogue.logic.levels.loader import LevelLoader, LevelGenerator
 from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.logic.states import State
 from dune_rogue.render.menus.main_menu import MainMenu
@@ -9,6 +10,9 @@ from dune_rogue.render.menus.pause_menu import PauseMenu
 from dune_rogue.render.menus.lvl_select_menu import LvlSelectMenu
 from dune_rogue.other.pkl_utils import save_pkl, load_pkl
 from dune_rogue.render.menus.error_message import ErrorMsg
+
+_MIN_LEVEL_SIZE = 15
+_MAX_LEVEL_SIZE = 40
 
 
 class GameControl:
@@ -72,7 +76,9 @@ class GameControl:
                 # If level finished load next otherwise go to the main menu
                 if self.level and self.level.is_finished:
                     try:
-                        self.level = self.level_loader.load_next_from_file(self.player)
+                        self.level_loader.set_sizes(randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE),
+                                                    randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE))
+                        self.level = self.level_loader.build(self.player)
                     except:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
@@ -81,17 +87,25 @@ class GameControl:
 
                 # Starting new game
                 if self.state == State.MAIN_MENU and new_state == State.LEVEL:
+                    self.level_loader = LevelLoader()
+                    self.level_selection.loader = self.level_loader
                     self.level_loader.reset()
                     try:
-                        self.level = self.level_loader.load_next_from_file(self.player)
+                        self.level = self.level_loader.build(self.player)
                     except:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
+                elif self.state == State.MAIN_MENU and new_state == State.DUNGEON:
+                    new_state = State.LEVEL
+                    self.level_loader = LevelGenerator()
+                    self.level_loader.set_sizes(randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE),
+                                                randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE))
+                    self.level = self.level_loader.build(self.player)
                 # Loading selected level
                 elif self.state == State.LEVEL_SELECTION and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
                     try:
-                        self.level = self.level_loader.load_next_from_file(self.player)
+                        self.level = self.level_loader.build(self.player)
                     except:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.LEVEL_SELECTION)
@@ -102,6 +116,8 @@ class GameControl:
                     else:
                         new_state = State.ERR
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
+                    self.level_loader = LevelLoader()
+                    self.level_selection.loader = self.level_loader
 
                 if new_state == State.LOAD:
                     if self.load_game():
