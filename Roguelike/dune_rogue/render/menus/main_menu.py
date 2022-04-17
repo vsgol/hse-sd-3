@@ -7,6 +7,7 @@ class MainMenu(SimpleMenu):
     def __init__(self):
         super().__init__(options=[
             ('Start game', State.LEVEL),
+            ('Dungeon mode', State.DUNGEON),
             ('Select level', State.LEVEL_SELECTION),
             ('Load game', State.LOAD),
             ('Exit', State.EXIT)

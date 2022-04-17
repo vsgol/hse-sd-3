@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from random import randrange, shuffle
 
 from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
 from dune_rogue.logic.entities.factory import EntityFactory
@@ -25,6 +26,12 @@ _ACTING_ENTITY_MAPPING = {
     '&': EntityFactory.create_worn_stillsuit,
     # '@': EntityFactory.create_player_character
 }
+
+_MIN_ROOM_SIZE = 4
+_MAX_ROOM_SIZE = 10
+_MIN_ROOMS = 5
+_MAX_ROOMS = 10
+_GEN_ITERS = 10
 
 
 class Level(Scene):
@@ -112,7 +119,8 @@ class Level(Scene):
         self.player = player
         self.is_finished = False
         self.finish_coord = None
-        self.load_from_file(load_file)
+        if load_file:
+            self.load_from_file(load_file)
 
     def load_from_file(self, file_name):
         """Loads level from file
@@ -143,6 +151,99 @@ class Level(Scene):
                     self.acting_entities.append(self.player)
                 else:
                     self.acting_entities.append(_ACTING_ENTITY_MAPPING[ent_symbol](x, y))
+
+    class Room:
+        def __init__(self, x, y, w, h):
+            self.x = x
+            self.y = y
+            self.w = w
+            self.h = h
+
+    def generate(self, w, h):
+        """Generates random level
+        :argument w: width
+        :argument h: height
+        """
+        self.static_entities = [['#'] * w for _ in range(h)]
+        self.acting_entities = []
+        self.w = w
+        self.h = h
+        rooms = []
+
+        total_rooms = randrange(_MIN_ROOMS, _MAX_ROOMS)
+        for i in range(_GEN_ITERS):
+            for r in range(total_rooms):
+                if len(rooms) >= _MAX_ROOMS:
+                    break
+
+                width = randrange(_MIN_ROOM_SIZE, _MAX_ROOM_SIZE)
+                height = randrange(_MIN_ROOM_SIZE, _MAX_ROOM_SIZE)
+                if w - width - 1 < 2 or h - height - 1 < 2:
+                    continue
+                x = randrange(1, w - width - 1)
+                y = randrange(1, h - height - 1)
+
+                room = self.Room(x, y, width, height)
+
+                def check_overlap(room, rooms):
+                    for other in rooms:
+                        if (room.x <= other.x + other.w and room.x + room.w >= other.x) and\
+                                (room.y <= other.y + other.h and room.y + room.h >= other.y):
+                            return True
+                    return False
+
+                if check_overlap(room, rooms):
+                    pass
+                else:
+                    rooms.append(room)
+        for room in rooms:
+            for y in range(room.y, room.y + room.h):
+                for x in range(room.x, room.x + room.w):
+                    self.static_entities[y][x] = ' '
+
+        shuffle(rooms)
+        for i in range(len(rooms) - 1):
+            r1 = rooms[i]
+            r2 = rooms[i + 1]
+
+            for x in range(r1.x, r2.x + 1):
+                self.static_entities[r1.y][x] = ' '
+            for y in range(r1.y, r2.y + 1):
+                self.static_entities[y][r1.x] = ' '
+            for x in range(r2.x, r1.x + 1):
+                self.static_entities[r1.y][x] = ' '
+            for y in range(r2.y, r1.y + 1):
+                self.static_entities[y][r1.x] = ' '
+            for x in range(r1.x, r2.x + 1):
+                self.static_entities[r2.y][x] = ' '
+            for y in range(r1.y, r2.y + 1):
+                self.static_entities[y][r2.x] = ' '
+            for x in range(r2.x, r1.x + 1):
+                self.static_entities[r2.y][x] = ' '
+            for y in range(r2.y, r1.y + 1):
+                self.static_entities[y][r2.x] = ' '
+
+        for i in range(h):
+            for j in range(w):
+                self.static_entities[i][j] = _STATIC_ENTITY_MAPPING[self.static_entities[i][j]](j, i)
+
+        def get_random_pos():
+            rnd_room = rooms[randrange(0, len(rooms))]
+            x_pos = randrange(0, rnd_room.w) + rnd_room.x
+            y_pos = randrange(0, rnd_room.h) + rnd_room.y
+            return x_pos, y_pos
+
+        finish_x_pos, finish_y_pos = get_random_pos()
+        self.finish_coord = (finish_x_pos, finish_y_pos)
+        self.static_entities[finish_y_pos][finish_x_pos] = _STATIC_ENTITY_MAPPING['X'](finish_y_pos, finish_x_pos)
+
+        x_pos, y_pos = get_random_pos()
+        while x_pos == finish_x_pos and y_pos == finish_y_pos:
+            x_pos, y_pos = get_random_pos()
+
+        self.player.x = x_pos
+        self.player.y = y_pos
+        self.acting_entities.append(self.player)
 
     def __str__(self):
         field = list(map(lambda ents: ''.join(map(str, ents)), self.static_entities))

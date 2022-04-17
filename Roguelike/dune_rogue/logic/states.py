@@ -12,3 +12,4 @@ class State(Enum):
     LOAD = 7
     EXIT = 8
     ERR = 9
+    DUNGEON = 10
