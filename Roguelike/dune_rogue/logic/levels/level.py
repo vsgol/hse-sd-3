@@ -1,3 +1,4 @@
+import math
 import os
 import random
 from pathlib import Path
@@ -8,7 +9,7 @@ from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.logic.entities.items.item_entity import ItemEntity
 from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
-from dune_rogue.render.color import WHITE_COLOR
+from dune_rogue.render.color import WHITE_COLOR, Color
 from dune_rogue.render.scene import Scene
 from dune_rogue.logic.actions import Action
 from dune_rogue.logic.states import State
@@ -39,20 +40,30 @@ _GEN_ITERS = 10
 
 
 class Level(Scene):
+    mult = [
+        [1, 0, 0, -1, -1, 0, 0, 1],
+        [0, 1, -1, 0, 0, -1, 1, 0],
+        [0, 1, 1, 0, 0, -1, -1, 0],
+        [1, 0, 0, 1, -1, 0, 0, -1]
+    ]
+
     """Level class"""
     def render(self):
+        self.update_visibility()
         text = list(map(lambda ents: list(map(str, ents)), self.static_entities))
-        colors = [[WHITE_COLOR] * self.w for _ in range(self.h)]
+        colors = [[Color(50, 50, 50)] * self.w for _ in range(self.h)]
         solid = [[False] * self.w for _ in range(self.h)]
         for i in range(self.h):
             for j in range(self.w):
-                colors[i][j] = self.static_entities[i][j].glyph.color
+                text[i][j] = text[i][j] if self.explored[i][j] else ' '
+                if self.visible[i][j]:
+                    colors[i][j] = self.static_entities[i][j].glyph.color
                 solid[i][j] = self.static_entities[i][j].is_solid
 
         for ent in self.acting_entities:
             if not solid[ent.y][ent.x]:
                 solid[ent.y][ent.x] = ent.is_solid
-                text[ent.y][ent.x] = ent.glyph.symbol
+                text[ent.y][ent.x] = ent.glyph.symbol if self.visible[ent.y][ent.x] else ' '
                 colors[ent.y][ent.x] = ent.glyph.color
         text[self.player.y][self.player.x] = self.player.glyph.symbol
         colors[self.player.y][self.player.x] = self.player.glyph.color
@@ -123,6 +134,9 @@ class Level(Scene):
         self.player = player
         self.is_finished = False
         self.finish_coord = None
+        self.explored = []
+        self.visible = []
+
         if load_file:
             self.load_from_file(load_file)
 
@@ -144,6 +158,7 @@ class Level(Scene):
                     if ent_symbols[j] == 'X':
                         self.finish_coord = (j, i)
                 self.static_entities.append(ent_row)
+                self.explored.append([False] * w)
             n_acting = int(file.readline())
 
             for _ in range(n_acting):
@@ -173,6 +188,7 @@ class Level(Scene):
         self.w = w
         self.h = h
         rooms = []
+        self.explored = [[False] * w for _ in range(h)]
 
         total_rooms = randrange(_MIN_ROOMS, _MAX_ROOMS)
         for i in range(_GEN_ITERS):
@@ -269,6 +285,71 @@ class Level(Scene):
                         continue
                     n_items += 1
                 self.acting_entities.append(ent)
+
+    ### Lighting code is from here http://www.roguebasin.com/index.php/Python_shadowcasting_implementation
+    def blocked(self, x, y):
+        return (x < 0 or y < 0
+                or x >= self.w or y >= self.h
+                or self.static_entities[y][x].is_solid)
+
+    def _cast_light(self, cx, cy, row, start, end, radius, xx, xy, yx, yy, id):
+        "Recursive lightcasting function"
+        if start < end:
+            return
+        radius_squared = radius * radius
+        for j in range(row, radius + 1):
+            dx, dy = -j - 1, -j
+            blocked = False
+            while dx <= 0:
+                dx += 1
+                # Translate the dx, dy coordinates into map coordinates:
+                X, Y = cx + dx * xx + dy * xy, cy + dx * yx + dy * yy
+                # l_slope and r_slope store the slopes of the left and right
+                # extremities of the square we're considering:
+                l_slope, r_slope = (dx - 0.5) / (dy + 0.5), (dx + 0.5) / (dy - 0.5)
+                if start < r_slope:
+                    continue
+                elif end > l_slope:
+                    break
+                else:
+                    # Our light beam is touching this square; light it:
+                    if dx * dx + dy * dy < radius_squared:
+                        self.visible[Y][X] = True
+                        self.explored[Y][X] = True
+                    if blocked:
+                        # we're scanning a row of blocked squares:
+                        if self.blocked(X, Y):
+                            new_start = r_slope
+                            continue
+                        else:
+                            blocked = False
+                            start = new_start
+                    else:
+                        if self.blocked(X, Y) and j < radius:
+                            # This is a blocking square, start a child scan:
+                            blocked = True
+                            self._cast_light(cx, cy, j + 1, start, l_slope,
+                                             radius, xx, xy, yx, yy, id + 1)
+                            new_start = r_slope
+            # Row is scanned; do next row unless last square was blocked:
+            if blocked:
+                break
+
+    def do_fov(self, x, y, radius):
+        "Calculate lit squares from the given location and radius"
+        for oct in range(8):
+            self._cast_light(x, y, 1, 1.0, 0.0, radius,
+                             self.mult[0][oct], self.mult[1][oct],
+                             self.mult[2][oct], self.mult[3][oct], 0)
+
+    def update_visibility(self, r=6):
+        self.visible = []
+        self.visible = [[False] * self.w for _ in range(self.h)]
+
+        x_orig = self.player.x
+        y_orig = self.player.y
+
+        self.do_fov(x_orig, y_orig, r)
 
     def __str__(self):
         field = list(map(lambda ents: ''.join(map(str, ents)), self.static_entities))
