@@ -1,6 +1,7 @@
 from dune_rogue.logic.actions import Action
-from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.factories.factory import EntityFactory
 from dune_rogue.logic.items.armors.worn_stillsuit import WornStillsuit
+from dune_rogue.logic.items.usable.healing_potion import HealingPotion
 from dune_rogue.logic.items.weapons.unfixed_crysknife import UnfixedCrysknife
 from dune_rogue.logic.states import State
 from dune_rogue.render.menus.menu import Menu
@@ -12,6 +13,7 @@ MAX_DESCR_LINE_LEN = 10
 _ITEM_TO_ENTITY_FUNC = {
     UnfixedCrysknife: EntityFactory.create_unfixed_crys,
     WornStillsuit: EntityFactory.create_worn_stillsuit,
+    HealingPotion: EntityFactory.create_potion,
 }
 
 
@@ -97,3 +99,5 @@ class InventoryMenu(Menu):
                     self.player.equip_item(selected_item)
                 else:
                     self.player.unequip_item(selected_item)
+            elif selected_item.usable:
+                self.player.use_item(self.selected_option)

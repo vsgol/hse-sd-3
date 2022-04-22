@@ -67,3 +67,13 @@ class PlayerCharacter(CharacterEntity):
             self.armor = None
         self.stats.remove_stats(item.get_bonuses())
         item.unequip()
+
+    def use_item(self, item_id):
+        """Uses item
+        :argument item_id: id of the item to be used
+        """
+        item = self.inventory.items[item_id]
+        if not item.usable:
+            return
+        self.stats.add_stats(item.get_bonuses())
+        self.inventory.remove_item(item_id)

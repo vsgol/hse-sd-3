@@ -1,6 +1,6 @@
 import unittest
 
-from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.factories.factory import EntityFactory
 from dune_rogue.logic.entities.items.unfixed_crysknife_entity import UnfixedCrysknifeEntity
 from dune_rogue.logic.entities.items.worn_stillsuit_entity import WornStillsuitEntity
 from dune_rogue.logic.entities.npcs.cielago import Cielago
@@ -26,15 +26,15 @@ class EntFactoryTest(unittest.TestCase):
         self.assertTrue(isinstance(ent, LevelFinishEntity))
         self.assertEqual((ent.x, ent.y), (1, 2))
 
-        ent = factory.create_fox(1, 2)
+        ent = factory.create_passive(1, 2)
         self.assertTrue(isinstance(ent, KitFox))
         self.assertEqual((ent.x, ent.y), (1, 2))
 
-        ent = factory.create_mouse(1, 2)
+        ent = factory.create_coward(1, 2)
         self.assertTrue(isinstance(ent, KangarooMouse))
         self.assertEqual((ent.x, ent.y), (1, 2))
 
-        ent = factory.create_cielago(1, 2)
+        ent = factory.create_aggressive(1, 2)
         self.assertTrue(isinstance(ent, Cielago))
         self.assertEqual((ent.x, ent.y), (1, 2))
 

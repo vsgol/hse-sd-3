@@ -49,6 +49,7 @@ class CharacterStats(Stats):
         """
         s = self + bonus
         self.__dict__.update(s.__dict__)
+        self.hp = min(self.max_hp, self.hp)
 
     def remove_stats(self, bonus):
         """Remove bonuses from statistics

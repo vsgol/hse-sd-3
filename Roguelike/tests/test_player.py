@@ -40,9 +40,9 @@ class PlayerTest(unittest.TestCase):
         self.assertEqual(enemy.stats.hp, enemy.stats.max_hp - player.stats.attack)
 
     def test_equip(self):
-        ITEM_STATS = Stats(1, 2, 3, 4)
-        ITEM_STATS_2 = Stats(-1, -2, -3, -4)
-        PLAYER_STATS = PlayerStats(5, 6, 7, 8)
+        ITEM_STATS = Stats(0, 2, 3, 0)
+        ITEM_STATS_2 = Stats(0, -2, -3, 0)
+        PLAYER_STATS = PlayerStats(0, 6, 7, 0)
 
         class DummyWeapon(Weapon):
             def __init__(self):

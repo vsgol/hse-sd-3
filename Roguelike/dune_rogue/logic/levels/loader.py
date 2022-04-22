@@ -6,6 +6,9 @@ from dune_rogue.logic.levels.level import Level
 
 
 class LevelBuilder(ABC):
+    def __init__(self):
+        self.factory = None
+
     """Abstract level builder class"""
     def set_sizes(self, w, h):
         """Set level sized before build"""
@@ -19,10 +22,15 @@ class LevelBuilder(ABC):
         """Resets builder"""
         pass
 
+    def set_factory(self, factory):
+        """Sets factory for levels building"""
+        self.factory = factory
+
 
 class LevelLoader(LevelBuilder):
     """Loader for levels"""
     def __init__(self):
+        super().__init__()
         cwd = os.path.realpath(__file__)
         path = Path(cwd)
         self.levels_dir = str(path.parent.absolute()) + os.sep + 'predefined' + os.sep
@@ -46,6 +54,7 @@ class LevelLoader(LevelBuilder):
 
 class LevelGenerator(LevelBuilder):
     def __init__(self):
+        super().__init__()
         self.w = None
         self.h = None
 
@@ -54,7 +63,7 @@ class LevelGenerator(LevelBuilder):
             raise ValueError('width and height must be set before generating level')
 
         level = Level(None, player)
-        level.generate(self.w, self.h)
+        level.generate(self.w, self.h, self.factory)
 
         self.w = None
         self.h = None

@@ -1,11 +1,10 @@
-import math
-import os
 import random
-from pathlib import Path
 from random import randrange, shuffle
 
 from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
-from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.factories.animals import AnimalsFactory
+from dune_rogue.logic.entities.factories.factory import EntityFactory
+from dune_rogue.logic.entities.factories.machines import MachinesFactory
 from dune_rogue.logic.entities.items.item_entity import ItemEntity
 from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
@@ -14,20 +13,6 @@ from dune_rogue.render.scene import Scene
 from dune_rogue.logic.actions import Action
 from dune_rogue.logic.states import State
 
-_STATIC_ENTITY_MAPPING = {
-    '#': EntityFactory.create_wall,
-    ' ': EntityFactory.create_floor,
-    'X': EntityFactory.create_finish,
-}
-
-_ACTING_ENTITY_MAPPING = {
-    'c': EntityFactory.create_cielago,
-    'm': EntityFactory.create_mouse,
-    'f': EntityFactory.create_fox,
-    '|': EntityFactory.create_unfixed_crys,
-    '&': EntityFactory.create_worn_stillsuit,
-    # '@': EntityFactory.create_player_character
-}
 
 _MIN_ROOM_SIZE = 4
 _MAX_ROOM_SIZE = 10
@@ -47,6 +32,29 @@ class Level(Scene):
         [1, 0, 0, 1, -1, 0, 0, -1]
     ]
 
+    def __init__(self, load_file, player):
+        """
+        :param load_file: file to load level from
+        :param player: player character entity
+        """
+        self.w = 0
+        self.h = 0
+        self.static_entities = []
+        self.acting_entities = []
+        self.player = player
+        self.is_finished = False
+        self.finish_coord = None
+        self.explored = []
+        self.visible = []
+        self.light = False
+
+        self._STATIC_ENTITY_MAPPING = {}
+        self._ACTING_ENTITY_MAPPING = {}
+        self.factory = None
+
+        if load_file:
+            self.load_from_file(load_file)
+
     """Level class"""
     def render(self):
         self.update_visibility()
@@ -63,8 +71,9 @@ class Level(Scene):
         for ent in self.acting_entities:
             if not solid[ent.y][ent.x]:
                 solid[ent.y][ent.x] = ent.is_solid
-                text[ent.y][ent.x] = ent.glyph.symbol if self.visible[ent.y][ent.x] else ' '
-                colors[ent.y][ent.x] = ent.glyph.color
+                if self.visible[ent.y][ent.x]:
+                    text[ent.y][ent.x] = ent.glyph.symbol
+                    colors[ent.y][ent.x] = ent.glyph.color
         text[self.player.y][self.player.x] = self.player.glyph.symbol
         colors[self.player.y][self.player.x] = self.player.glyph.color
 
@@ -109,6 +118,7 @@ class Level(Scene):
             ent.update(mediator)
             if not self.player.is_alive:
                 return State.MAIN_MENU
+        self.acting_entities += mediator.new_entities
         self.filter_entities()
 
         for ent in self.acting_entities:
@@ -122,29 +132,38 @@ class Level(Scene):
             self.is_finished = True
         return State.LEVEL
 
-    def __init__(self, load_file, player):
-        """
-        :param load_file: file to load level from
-        :param player: player character entity
-        """
-        self.w = 0
-        self.h = 0
-        self.static_entities = []
-        self.acting_entities = []
-        self.player = player
-        self.is_finished = False
-        self.finish_coord = None
-        self.explored = []
-        self.visible = []
+    def set_factory(self, factory):
+        self.factory = factory
+        self._STATIC_ENTITY_MAPPING = {
+            '#': factory.create_wall,
+            ' ': factory.create_floor,
+            'X': factory.create_finish,
+        }
 
-        if load_file:
-            self.load_from_file(load_file)
+        self._ACTING_ENTITY_MAPPING = {
+            'a': factory.create_aggressive,
+            'c': factory.create_coward,
+            'p': factory.create_passive,
+            'r': factory.create_ghola,
+            '|': factory.create_unfixed_crys,
+            '&': factory.create_worn_stillsuit,
+            # '@': EntityFactory.create_player_character
+        }
 
     def load_from_file(self, file_name):
         """Loads level from file
         :argument file_name: file to load from
         """
         with open(file_name, 'r') as file:
+            factory_type = file.readline().strip()
+
+            if factory_type == 'animals':
+                self.set_factory(AnimalsFactory())
+            elif factory_type == 'machines':
+                self.set_factory(MachinesFactory())
+            else:
+                raise ValueError(f'Unknown level type {factory_type}')
+
             w, h = map(int, file.readline().split())
             self.w, self.h = w, h
             self.static_entities = []
@@ -154,11 +173,13 @@ class Level(Scene):
                 ent_row = []
                 ent_symbols = file.readline()
                 for j in range(w):
-                    ent_row.append(_STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
+                    ent_row.append(self._STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
                     if ent_symbols[j] == 'X':
                         self.finish_coord = (j, i)
                 self.static_entities.append(ent_row)
                 self.explored.append([False] * w)
+
+
             n_acting = int(file.readline())
 
             for _ in range(n_acting):
@@ -169,7 +190,7 @@ class Level(Scene):
                     self.player.y = y
                     self.acting_entities.append(self.player)
                 else:
-                    self.acting_entities.append(_ACTING_ENTITY_MAPPING[ent_symbol](x, y))
+                    self.acting_entities.append(self._ACTING_ENTITY_MAPPING[ent_symbol](x, y))
 
     class Room:
         def __init__(self, x, y, w, h):
@@ -178,11 +199,14 @@ class Level(Scene):
             self.w = w
             self.h = h
 
-    def generate(self, w, h):
+    def generate(self, w, h, factory):
         """Generates random level
         :argument w: width
         :argument h: height
+        :argument factory: entities factory
         """
+        self.set_factory(factory)
+
         self.static_entities = [['#'] * w for _ in range(h)]
         self.acting_entities = []
         self.w = w
@@ -245,7 +269,7 @@ class Level(Scene):
 
         for i in range(h):
             for j in range(w):
-                self.static_entities[i][j] = _STATIC_ENTITY_MAPPING[self.static_entities[i][j]](j, i)
+                self.static_entities[i][j] = self._STATIC_ENTITY_MAPPING[self.static_entities[i][j]](j, i)
 
         def get_random_pos():
             rnd_room = rooms[randrange(0, len(rooms))]
@@ -255,7 +279,7 @@ class Level(Scene):
 
         finish_x_pos, finish_y_pos = get_random_pos()
         self.finish_coord = (finish_x_pos, finish_y_pos)
-        self.static_entities[finish_y_pos][finish_x_pos] = _STATIC_ENTITY_MAPPING['X'](finish_y_pos, finish_x_pos)
+        self.static_entities[finish_y_pos][finish_x_pos] = self._STATIC_ENTITY_MAPPING['X'](finish_y_pos, finish_x_pos)
 
         x_pos, y_pos = get_random_pos()
         while x_pos == finish_x_pos and y_pos == finish_y_pos:
@@ -279,7 +303,20 @@ class Level(Scene):
                 if old_ent.is_solid:
                     continue
 
-                ent = _ACTING_ENTITY_MAPPING[random.choice(list(_ACTING_ENTITY_MAPPING.keys()))](x_pos, y_pos)
+                symb = random.choice(list(self._ACTING_ENTITY_MAPPING.keys()))
+                ent = self._ACTING_ENTITY_MAPPING[symb](x_pos, y_pos)
+                if symb == 'r':
+                    for i in range(randrange(2, 4)):
+                        for j in range(randrange(2, 4)):
+                            for dx in range(-i, i + 1):
+                                for dy in range(-j, j + 1):
+                                    ex = x_pos + dx
+                                    ey = y_pos + dy
+                                    if ex >= self.w or ey >= self.h or self.static_entities[ey][ex].is_solid or random.random() < 0.5:
+                                        continue
+                                    c_ent = self._ACTING_ENTITY_MAPPING[symb](ex, ey)
+                                    self.acting_entities.append(c_ent)
+                                    n_entities += 1
                 if isinstance(ent, ItemEntity):
                     if n_items >= _MAX_ITEMS:
                         continue
@@ -343,13 +380,17 @@ class Level(Scene):
                              self.mult[2][oct], self.mult[3][oct], 0)
 
     def update_visibility(self, r=6):
-        self.visible = []
-        self.visible = [[False] * self.w for _ in range(self.h)]
+        if self.light:
+            self.visible = []
+            self.visible = [[False] * self.w for _ in range(self.h)]
 
-        x_orig = self.player.x
-        y_orig = self.player.y
+            x_orig = self.player.x
+            y_orig = self.player.y
 
-        self.do_fov(x_orig, y_orig, r)
+            self.do_fov(x_orig, y_orig, r)
+        else:
+            self.visible = [[True] * self.w for _ in range(self.h)]
+            self.explored = self.visible
 
     def __str__(self):
         field = list(map(lambda ents: ''.join(map(str, ents)), self.static_entities))

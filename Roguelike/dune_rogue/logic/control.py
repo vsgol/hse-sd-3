@@ -1,9 +1,11 @@
 import os
 from pathlib import Path
-from random import randrange
+from random import randrange, random
 
+from dune_rogue.logic.entities.factories.animals import AnimalsFactory
+from dune_rogue.logic.entities.factories.machines import MachinesFactory
 from dune_rogue.logic.levels.loader import LevelLoader, LevelGenerator
-from dune_rogue.logic.entities.factory import EntityFactory
+from dune_rogue.logic.entities.factories.factory import EntityFactory
 from dune_rogue.logic.states import State
 from dune_rogue.render.menus.inventory_menu import InventoryMenu
 from dune_rogue.render.menus.main_menu import MainMenu
@@ -34,6 +36,7 @@ class GameControl:
         self.input_handler = drawer.input_handler
         self.state = State.MAIN_MENU
         self.current_scene = self.main_menu
+        self.vision = True
 
         self.save_dir = str(Path.home()) + os.sep + '.dune_rogue' + os.sep
         self.save_lvl = self.save_dir + 'lvl_save.pkl'
@@ -81,7 +84,9 @@ class GameControl:
                     try:
                         self.level_loader.set_sizes(randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE),
                                                     randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE))
+                        self.level_loader.set_factory(AnimalsFactory() if random() < 0.5 else MachinesFactory())
                         self.level = self.level_loader.build(self.player)
+                        self.level.light = self.vision
                         self.inventory = InventoryMenu(self.player, self.level)
                     except:
                         new_state = State.ERR
@@ -98,6 +103,7 @@ class GameControl:
                     self.level_loader.reset()
                     try:
                         self.level = self.level_loader.build(self.player)
+                        self.level.light = self.vision
                         self.inventory = InventoryMenu(self.player, self.level)
                     except:
                         new_state = State.ERR
@@ -108,13 +114,16 @@ class GameControl:
                     self.level_loader = LevelGenerator()
                     self.level_loader.set_sizes(randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE),
                                                 randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE))
+                    self.level_loader.set_factory(AnimalsFactory() if random() < 0.5 else MachinesFactory())
                     self.level = self.level_loader.build(self.player)
+                    self.level.light = self.vision
                     self.inventory = InventoryMenu(self.player, self.level)
                 # Loading selected level
                 elif self.state == State.LEVEL_SELECTION and new_state == State.LEVEL:
                     self.player = EntityFactory().create_player_character(0, 0)
                     try:
                         self.level = self.level_loader.build(self.player)
+                        self.level.light = self.vision
                         self.inventory = InventoryMenu(self.player, self.level)
                     except:
                         new_state = State.ERR
@@ -128,6 +137,11 @@ class GameControl:
                         self.err_msg = ErrorMsg(State.MAIN_MENU)
                     self.level_loader = LevelLoader()
                     self.level_selection.loader = self.level_loader
+                    # Switching vision
+                elif self.state == State.PAUSE_MENU and new_state == State.SWITCH_VISION:
+                    self.vision = not self.vision
+                    self.level.light = self.vision
+                    new_state = State.LEVEL
 
                 if new_state == State.LOAD:
                     if self.load_game():
