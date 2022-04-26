@@ -1,15 +1,10 @@
 from dune_rogue.logic.entities.items.healing_potion_entity import HealingPotionEntity
 from dune_rogue.logic.entities.items.unfixed_crysknife_entity import UnfixedCrysknifeEntity
 from dune_rogue.logic.entities.items.worn_stillsuit_entity import WornStillsuitEntity
-from dune_rogue.logic.entities.npcs.cielago import Cielago
 from dune_rogue.logic.entities.npcs.ghola import Ghola
-from dune_rogue.logic.entities.npcs.kangaroo_mouse import KangarooMouse
-from dune_rogue.logic.entities.npcs.kit_fox import KitFox
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.entities.static_entities import WallEntity, FloorEntity, LevelFinishEntity
-from dune_rogue.logic.items.armors.worn_stillsuit import WornStillsuit
 from dune_rogue.logic.items.usable.healing_potion import HealingPotion
-from dune_rogue.logic.items.weapons.unfixed_crysknife import UnfixedCrysknife
 
 
 class EntityFactory:
@@ -60,7 +55,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized cielago entity
         """
-        return Cielago(x, y)
+        raise NotImplementedError('aggressive creation is not implemented')
 
     @staticmethod
     def create_coward(x, y):
@@ -69,7 +64,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized kangaroo mouse entity
         """
-        return KangarooMouse(x, y)
+        raise NotImplementedError('coward creation is not implemented')
 
     @staticmethod
     def create_passive(x, y):
@@ -78,7 +73,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized kit fox entity
         """
-        return KitFox(x, y)
+        raise NotImplementedError('passive creation is not implemented')
 
     @staticmethod
     def create_unfixed_crys(x, y):
