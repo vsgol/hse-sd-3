@@ -25,6 +25,7 @@ _GEN_ITERS = 10
 
 
 class Level(Scene):
+    """Level class"""
     mult = [
         [1, 0, 0, -1, -1, 0, 0, 1],
         [0, 1, -1, 0, 0, -1, 1, 0],
@@ -55,7 +56,7 @@ class Level(Scene):
         if load_file:
             self.load_from_file(load_file)
 
-    """Level class"""
+
     def render(self):
         self.update_visibility()
         text = list(map(lambda ents: list(map(str, ents)), self.static_entities))

@@ -53,12 +53,17 @@ class LevelLoader(LevelBuilder):
 
 
 class LevelGenerator(LevelBuilder):
+    """Generator for levels"""
     def __init__(self):
         super().__init__()
         self.w = None
         self.h = None
 
     def build(self, player):
+        """ Generates random level
+        :argument player: player character
+        :return: next level
+        """
         if not self.w or not self.h:
             raise ValueError('width and height must be set before generating level')
 
