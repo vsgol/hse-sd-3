@@ -9,4 +9,4 @@ class BrainInAJar(Enemy):
     """Brain in a jar passive enemy"""
     def __init__(self, x, y):
         super().__init__(x, y, Glyph('B', Color(0, 78, 56)), PassiveBehavior(), 10,
-                         stats=CharacterStats(6, 2, 1, 6))
+                         stats=CharacterStats(6, 2, 1, 6, 0.2))

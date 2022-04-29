@@ -1,11 +1,17 @@
 from dune_rogue.logic.ai.behavior import Behavior
+from dune_rogue.logic.ai.coward import CowardBehavior
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 
 
 class PassiveBehavior(Behavior):
     """Entity stays at its position and attacks player if it can"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, previous=None):
+        super().__init__(previous)
+
+    def new_behavior(self, entity):
+        if 3 * entity.stats.hp <= entity.stats.max_hp:
+            return CowardBehavior(previous=self)
+        return self
 
     def move(self, entity, mediator):
         x_player = mediator.level.player.x

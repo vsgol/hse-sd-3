@@ -9,4 +9,4 @@ class Cielago(Enemy):
     """Cielago aggressive enemy"""
     def __init__(self, x, y):
         super().__init__(x, y, Glyph('c', Color(131, 67, 51)), AggressiveBehavior(), 3,
-                         stats=CharacterStats(4, 1, 1, 4))
+                         stats=CharacterStats(4, 1, 1, 4, 0.2))

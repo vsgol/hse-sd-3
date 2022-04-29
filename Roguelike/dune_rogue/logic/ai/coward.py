@@ -1,15 +1,18 @@
 import random
-from collections import deque
-
-from dune_rogue.logic.ai.aggressive import AggressiveBehavior
-from dune_rogue.logic.ai.behavior import Behavior
+from dune_rogue.logic.ai.behavior import Behavior, build_priority
 from dune_rogue.logic.ai.random import RandomBehavior
 
 
-class CowardBehavior(AggressiveBehavior):
+class CowardBehavior(Behavior):
     """Entity escapes for player when player near enough"""
-    def __init__(self, radius=25):
-        super().__init__(radius)
+    def __init__(self, radius=25, previous=None):
+        self.radius = radius
+        super().__init__(previous)
+
+    def new_behavior(self, entity):
+        if self.previous and 3 * entity.stats.hp > entity.stats.max_hp:
+            return self.previous
+        return self
 
     def move(self, entity, mediator):
         x_player = mediator.level.player.x
@@ -22,7 +25,7 @@ class CowardBehavior(AggressiveBehavior):
             RandomBehavior().move(entity, mediator)
             return
 
-        neg_priority = self.build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator)
+        neg_priority = build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator)
         neg_priority[y_entity][x_entity] *= -1
 
         static, acting = mediator.get_all_entities()

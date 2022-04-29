@@ -2,6 +2,7 @@ import random
 from random import randrange, shuffle
 
 from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
+from dune_rogue.logic.entities.acting_entity import CharacterEntity
 from dune_rogue.logic.entities.factories.animals import AnimalsFactory
 from dune_rogue.logic.entities.factories.factory import EntityFactory
 from dune_rogue.logic.entities.factories.machines import MachinesFactory
@@ -55,7 +56,6 @@ class Level(Scene):
 
         if load_file:
             self.load_from_file(load_file)
-
 
     def render(self):
         self.update_visibility()
@@ -121,6 +121,10 @@ class Level(Scene):
                 return State.MAIN_MENU
         self.acting_entities += mediator.new_entities
         self.filter_entities()
+
+        for ent in self.acting_entities:
+            if isinstance(ent, CharacterEntity):
+                ent.regen()
 
         for ent in self.acting_entities:
             if isinstance(ent, NPC):

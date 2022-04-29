@@ -9,4 +9,4 @@ class Cymek(Enemy):
     """Cymek aggressive enemy"""
     def __init__(self, x, y):
         super().__init__(x, y, Glyph('C', Color(196, 202, 206)), AggressiveBehavior(), 16,
-                         stats=CharacterStats(6, 2, 2, 6))
+                         stats=CharacterStats(6, 2, 2, 6, 0.2))
