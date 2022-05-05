@@ -1,0 +1,35 @@
+@page
+@using logic.Models
+@model web.Pages.TasksList
+
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <title>ListTasks</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" />
+</head>
+<body>
+<div class="row mb-3 text-center">
+    <h2 class="col-sm-6">List of tasks</h2>
+</div>
+<table class="table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Publication date</th>
+        <th>Deadline date</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (HwTask p in Model.Tasks) {
+        <tr>
+            <td><a asp-page="./TaskDetails" asp-route-id="@p.Id">@p.Name</a></td>
+            <td>@p.PublicationDate</td>
+            <td>@p.DeadlineDate</td>
+        </tr>
+    }
+    </tbody>
+</table>
+</body>
+</html>
