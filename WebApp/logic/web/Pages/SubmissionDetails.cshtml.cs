@@ -55,6 +55,7 @@ public class SubmissionDetails : PageModel
         }
 
         curAttempt.Grade = Attempt.Grade;
+        await _context.SaveChangesAsync();
         HwTask = await _context.Tasks.FirstOrDefaultAsync(m => m.Id == curAttempt.TaskId);
         Comments = _context.Comments.Where(c => c.AttemptId == curAttempt.Id).ToList();
         if (!ModelState.IsValid)

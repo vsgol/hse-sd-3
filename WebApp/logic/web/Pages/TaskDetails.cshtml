@@ -30,7 +30,7 @@
             @Html.DisplayNameFor(model => model.HwTask.Description)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.HwTask.Description)
+            <span style="white-space: pre-line">@Model.HwTask.Description</span>
         </dd>
     </dl>
     <form asp-action="" method="post" asp-route-id="@Model.HwTask.Id">

@@ -20,10 +20,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Data" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.3.0" />
     </ItemGroup>
 
 </Project>

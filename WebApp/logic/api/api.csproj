@@ -7,12 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\data_lib\data_lib.csproj" />
-      <ProjectReference Include="..\logic\logic.csproj" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="RabbitMQ.Client" Version="6.3.0" />
+      <ProjectReference Include="..\data_lib\data_lib.csproj" />
+      <ProjectReference Include="..\logic\logic.csproj" />
     </ItemGroup>
 
 </Project>

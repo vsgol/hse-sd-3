@@ -37,7 +37,7 @@
             @Html.DisplayNameFor(model => model.Attempt.Output)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Attempt.Output)
+            <span style="white-space: pre-line">@Model.Attempt.Output</span>
         </dd>
     </dl>
     <form asp-action="" method="post" asp-route-id="@Model.Attempt.Id">
