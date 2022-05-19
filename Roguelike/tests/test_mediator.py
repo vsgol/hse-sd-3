@@ -1,5 +1,6 @@
 import unittest
 
+from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.entities.static_entities import FloorEntity, WallEntity
 from dune_rogue.logic.levels.mediator import LevelMediator
@@ -29,10 +30,10 @@ class MediatorTest(unittest.TestCase):
             [WallEntity(0, 1), WallEntity(1, 1)],
         ], [PlayerCharacter(0, 0)]))
 
-        self.assertTrue(isinstance(mediator.get_entity_at(0, 0), PlayerCharacter))
-        self.assertTrue(isinstance(mediator.get_entity_at(0, 1), WallEntity))
-        self.assertTrue(isinstance(mediator.get_entity_at(1, 0), WallEntity))
-        self.assertTrue(isinstance(mediator.get_entity_at(1, 1), WallEntity))
+        self.assertTrue(isinstance(mediator.get_entity_at(Coordinate(0, 0)), PlayerCharacter))
+        self.assertTrue(isinstance(mediator.get_entity_at(Coordinate(0, 1)), WallEntity))
+        self.assertTrue(isinstance(mediator.get_entity_at(Coordinate(1, 0)), WallEntity))
+        self.assertTrue(isinstance(mediator.get_entity_at(Coordinate(1, 1)), WallEntity))
 
 
 if __name__ == '__main__':

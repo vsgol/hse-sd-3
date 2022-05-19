@@ -14,17 +14,20 @@ class Behavior(ABC):
         raise NotImplementedError('move method is not implemented')
 
     @staticmethod
-    def move_to_cell(entity, mediator, x_new, y_new):
+    def move_to_cell(entity, mediator, new_coord):
         """ Move entity to new position or attack player at this position
         :argument entity: game entity which moves
         :argument mediator: level mediator
-        :argument x_new: target x coordinate
-        :argument y_new: target y coordinate
+        :argument new_coord: target coordinate
         """
-        target = mediator.get_entity_at(x_new, y_new)
+        target = mediator.get_entity_at(new_coord)
 
         entity.intersect(target)
 
         if not target.is_player:
-            entity.x = x_new
-            entity.y = y_new
+            entity.coord = new_coord
+
+    @staticmethod
+    def acceptable_position(new_pos, entity_pos):
+        return new_pos.x == entity_pos.x and abs(new_pos.y - entity_pos.y) <= 1 or \
+               new_pos.y == entity_pos.y and abs(new_pos.x - entity_pos.x) <= 1
