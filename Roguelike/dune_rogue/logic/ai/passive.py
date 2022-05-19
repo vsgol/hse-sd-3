@@ -14,14 +14,11 @@ class PassiveBehavior(Behavior):
         return self
 
     def move(self, entity, mediator):
-        x_player = mediator.level.player.x
-        y_player = mediator.level.player.y
-        x_entity = entity.x
-        y_entity = entity.y
+        player_coord = mediator.level.player.coord
+        entity_coord = entity.coord
 
-        x, y = x_entity, y_entity
-        if (x_player == x_entity and abs(y_player - y_entity) <= 1 or
-                y_player == y_entity and abs(x_player - x_entity) <= 1):
-            x, y = x_player, y_player
+        coord = entity_coord
+        if self.acceptable_position(player_coord, entity_coord):
+            coord = player_coord
 
-        self.move_to_cell(entity, mediator, x, y)
+        self.move_to_cell(entity, mediator, coord)

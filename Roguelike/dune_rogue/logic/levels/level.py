@@ -4,8 +4,8 @@ from random import randrange, shuffle
 from dune_rogue.logic.ai.status_effects.status_effect import StatusEffect
 from dune_rogue.logic.entities.acting_entity import CharacterEntity
 from dune_rogue.logic.entities.factories.animals import AnimalsFactory
-from dune_rogue.logic.entities.factories.factory import EntityFactory
 from dune_rogue.logic.entities.factories.machines import MachinesFactory
+from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.items.item_entity import ItemEntity
 from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
@@ -88,32 +88,24 @@ class Level(Scene):
                 self.player.stats.give_exp(ent.exp)
         self.acting_entities = list(filter(lambda e: e.is_alive, self.acting_entities))
 
-    def process_input(self, action):
-        mediator = LevelMediator(self)
+    def process_move(self, action, mediator):
+        target_coord = Coordinate(
+            self.player.x - (action == Action.MOVE_LEFT) + (action == Action.MOVE_RIGHT),
+            self.player.y - (action == Action.MOVE_UP) + (action == Action.MOVE_DOWN)
+        )
+        intersect_entity = mediator.get_entity_at(target_coord)
+        if not intersect_entity.is_solid:
+            self.player.coord = target_coord
+        self.player.intersect(intersect_entity)
 
-        if action in [Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT]:
-            target_coord = (
-                    self.player.x - (action == Action.MOVE_LEFT) + (action == Action.MOVE_RIGHT),
-                    self.player.y - (action == Action.MOVE_UP) + (action == Action.MOVE_DOWN)
-            )
-            intersect_entity = mediator.get_entity_at(target_coord[0], target_coord[1])
-            if not intersect_entity.is_solid:
-                self.player.x, self.player.y = target_coord
-            self.player.intersect(intersect_entity)
-        elif action == Action.TOGGLE_PAUSE:
-            return State.PAUSE_MENU
-        elif action == Action.TOGGLE_INVENTORY:
-            return State.INVENTORY
-        elif action == Action.PICK_PUT:
-            for i, ent in enumerate(self.acting_entities[::-1]):
-                if isinstance(ent, ItemEntity) and ent.x == self.player.x and ent.y == self.player.y:
-                    self.player.inventory.add_item(ent.item)
-                    del self.acting_entities[-i - 1]
-                    break
+    def process_pick(self):
+        for i, ent in enumerate(self.acting_entities[::-1]):
+            if isinstance(ent, ItemEntity) and ent.x == self.player.x and ent.y == self.player.y:
+                self.player.inventory.add_item(ent.item)
+                del self.acting_entities[-i - 1]
+                break
 
-        if not self.player.is_alive:
-            return State.MAIN_MENU
-
+    def update_entities(self, mediator):
         self.filter_entities()
         for i, ent in enumerate(self.acting_entities):
             ent.update(mediator)
@@ -126,14 +118,32 @@ class Level(Scene):
             if isinstance(ent, CharacterEntity):
                 ent.regen()
 
+    def update_status_effects(self):
         for ent in self.acting_entities:
-            if isinstance(ent, NPC):
-                if isinstance(ent.behavior, StatusEffect):
-                    ent.behavior.purify_others()
-                    if ent.behavior.duration <= 0:
-                        ent.behavior = ent.behavior.behavior
+            if isinstance(ent, NPC) and isinstance(ent.behavior, StatusEffect):
+                ent.behavior.purify_others()
+                if ent.behavior.duration <= 0:
+                    ent.behavior = ent.behavior.behavior
 
-        if self.player.x == self.finish_coord[0] and self.player.y == self.finish_coord[1]:
+    def process_input(self, action):
+        mediator = LevelMediator(self)
+
+        if action in [Action.MOVE_UP, Action.MOVE_DOWN, Action.MOVE_LEFT, Action.MOVE_RIGHT]:
+            self.process_move(action, mediator)
+        elif action == Action.TOGGLE_PAUSE:
+            return State.PAUSE_MENU
+        elif action == Action.TOGGLE_INVENTORY:
+            return State.INVENTORY
+        elif action == Action.PICK_PUT:
+            self.process_pick()
+
+        if not self.player.is_alive:
+            return State.MAIN_MENU
+
+        self.update_entities(mediator)
+        self.update_status_effects()
+
+        if self.player.coord == self.finish_coord:
             self.is_finished = True
         return State.LEVEL
 
@@ -180,7 +190,7 @@ class Level(Scene):
                 for j in range(w):
                     ent_row.append(self._STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
                     if ent_symbols[j] == 'X':
-                        self.finish_coord = (j, i)
+                        self.finish_coord = Coordinate(j, i)
                 self.static_entities.append(ent_row)
                 self.explored.append([False] * w)
 
@@ -280,18 +290,17 @@ class Level(Scene):
             rnd_room = rooms[randrange(0, len(rooms))]
             x_pos = randrange(0, rnd_room.w) + rnd_room.x
             y_pos = randrange(0, rnd_room.h) + rnd_room.y
-            return x_pos, y_pos
+            return Coordinate(x_pos, y_pos)
 
-        finish_x_pos, finish_y_pos = get_random_pos()
-        self.finish_coord = (finish_x_pos, finish_y_pos)
-        self.static_entities[finish_y_pos][finish_x_pos] = self._STATIC_ENTITY_MAPPING['X'](finish_y_pos, finish_x_pos)
+        finish_pos = get_random_pos()
+        self.finish_coord = finish_pos
+        self.static_entities[finish_pos.y][finish_pos.x] = self._STATIC_ENTITY_MAPPING['X'](finish_pos.x, finish_pos.y)
 
-        x_pos, y_pos = get_random_pos()
-        while x_pos == finish_x_pos and y_pos == finish_y_pos:
-            x_pos, y_pos = get_random_pos()
+        pos = get_random_pos()
+        while pos == finish_pos:
+            pos = get_random_pos()
 
-        self.player.x = x_pos
-        self.player.y = y_pos
+        self.player.coord = pos
         self.acting_entities.append(self.player)
 
         mediator = LevelMediator(self)
@@ -303,25 +312,26 @@ class Level(Scene):
                 if len(self.acting_entities) >= n_entities + 1:
                     break
 
-                x_pos, y_pos = get_random_pos()
-                old_ent = mediator.get_entity_at(x_pos, y_pos)
+                pos = get_random_pos()
+                old_ent = mediator.get_entity_at(pos)
                 if old_ent.is_solid:
                     continue
 
                 symb = random.choice(list(self._ACTING_ENTITY_MAPPING.keys()))
-                ent = self._ACTING_ENTITY_MAPPING[symb](x_pos, y_pos)
+                ent = self._ACTING_ENTITY_MAPPING[symb](pos.x, pos.y)
                 if symb == 'r':
                     for i in range(randrange(2, 4)):
                         for j in range(randrange(2, 4)):
                             for dx in range(-i, i + 1):
                                 for dy in range(-j, j + 1):
-                                    ex = x_pos + dx
-                                    ey = y_pos + dy
+                                    ex = pos.x + dx
+                                    ey = pos.y + dy
                                     if ex >= self.w or ey >= self.h or self.static_entities[ey][ex].is_solid or random.random() < 0.5:
                                         continue
                                     c_ent = self._ACTING_ENTITY_MAPPING[symb](ex, ey)
                                     self.acting_entities.append(c_ent)
                                     n_entities += 1
+
                 if isinstance(ent, ItemEntity):
                     if n_items >= _MAX_ITEMS:
                         continue

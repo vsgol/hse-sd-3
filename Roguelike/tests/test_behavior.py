@@ -14,71 +14,89 @@ class BehaviorTest(unittest.TestCase):
     cwd = os.path.realpath(__file__)
     path = Path(cwd)
     levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
-    corridor = Level(levels_dir + 'corridor.lvl', player)
 
-    def test_corridor(self):
-        mediator = LevelMediator(self.corridor)
-        coward = self.corridor.acting_entities[1]
-        aggressive = self.corridor.acting_entities[2]
-        passive = self.corridor.acting_entities[3]
+    def test_aggressive(self):
+        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        mediator = LevelMediator(corridor)
+        aggressive = corridor.acting_entities[2]
 
-        priority = build_priority(self.corridor.w, self.corridor.h,
-                                  self.player.x, self.player.y,
-                                  aggressive.x, aggressive.y, mediator)
+        priority = build_priority(corridor.w, corridor.h,
+                                  self.player.coord,
+                                  aggressive.coord, mediator)
 
-        target = [[-2.0] * self.corridor.w,
-                  [-2.0] + [round(0.99 ** i, 2) for i in range(self.corridor.w - 2)] + [-2.0],
-                  [-2.0] * self.corridor.w]
+        target = [[-2.0] * corridor.w,
+                  [-2.0] + [round(0.99 ** i, 2) for i in range(corridor.w - 2)] + [-2.0],
+                  [-2.0] * corridor.w]
         priority = list(map(lambda x: list(map(lambda e: round(e, 2), x)), priority))
         self.assertListEqual(priority, target)
 
-        priority = build_priority(self.corridor.w, self.corridor.h,
-                                  self.player.x, self.player.y,
-                                  coward.x, coward.y, mediator)
-        target = [[-2.0] * self.corridor.w,
-                  [-2.0] + [round(0.99 ** i, 2) for i in range(2)] + [-2.0] * (self.corridor.w - 3),
-                  [-2.0] * self.corridor.w]
-        priority = list(map(lambda x: list(map(lambda e: round(e, 2), x)), priority))
-        self.assertListEqual(priority, target)
-
-        coward_prev = (coward.x, coward.y)
         aggressive_prev = (aggressive.x, aggressive.y)
-        passive_prev = (passive.x, passive.y)
 
-        self.corridor.process_input(Action.MOVE_DOWN)
-        self.assertEqual((coward.x, coward.y), (coward_prev[0] + 1, coward_prev[1]))
+        corridor.process_input(Action.MOVE_DOWN)
         self.assertEqual((aggressive.x, aggressive.y), (aggressive_prev[0] - 1, aggressive_prev[1]))
-        self.assertEqual((passive.x, passive.y), passive_prev)
 
-        priority = build_priority(self.corridor.w, self.corridor.h,
-                                  self.player.x, self.player.y,
-                                  aggressive.x, aggressive.y, mediator)
+        priority = build_priority(corridor.w, corridor.h,
+                                  self.player.coord,
+                                  aggressive.coord, mediator)
 
-        target = [[-2.0] * self.corridor.w,
-                  [-2.0] + [round(0.99 ** i, 2) for i in range(self.corridor.w - 3)] + [-2.0, -2.0],
-                  [-2.0] * self.corridor.w]
+        target = [[-2.0] * corridor.w,
+                  [-2.0] + [round(0.99 ** i, 2) for i in range(corridor.w - 3)] + [-2.0, -2.0],
+                  [-2.0] * corridor.w]
+
         priority = list(map(lambda x: list(map(lambda e: round(e, 2), x)), priority))
         self.assertListEqual(priority, target)
 
-        priority = build_priority(self.corridor.w, self.corridor.h,
-                                  self.player.x, self.player.y,
-                                  coward.x, coward.y, mediator)
-        target = [[-2.0] * self.corridor.w,
-                  [-2.0] + [round(0.99 ** i, 2) for i in range(3)] + [-2.0] * (self.corridor.w - 4),
-                  [-2.0] * self.corridor.w]
+        aggressive_prev = (aggressive.x, aggressive.y)
+
+        corridor.process_input(Action.MOVE_DOWN)
+        self.assertEqual((aggressive.x, aggressive.y), (aggressive_prev[0], aggressive_prev[1]))
+
+    def test_coward(self):
+        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        mediator = LevelMediator(corridor)
+        coward = corridor.acting_entities[1]
+
+        priority = build_priority(corridor.w, corridor.h,
+                                  self.player.coord,
+                                  coward.coord, mediator)
+        target = [[-2.0] * corridor.w,
+                  [-2.0] + [round(0.99 ** i, 2) for i in range(2)] + [-2.0] * (corridor.w - 3),
+                  [-2.0] * corridor.w]
         priority = list(map(lambda x: list(map(lambda e: round(e, 2), x)), priority))
         self.assertListEqual(priority, target)
 
         coward_prev = (coward.x, coward.y)
-        aggressive_prev = (aggressive.x, aggressive.y)
+        corridor.process_input(Action.MOVE_DOWN)
+        self.assertEqual((coward.x, coward.y), (coward_prev[0] + 1, coward_prev[1]))
+
+        priority = build_priority(corridor.w, corridor.h,
+                                  self.player.coord,
+                                  coward.coord, mediator)
+        target = [[-2.0] * corridor.w,
+                  [-2.0] + [round(0.99 ** i, 2) for i in range(3)] + [-2.0] * (corridor.w - 4),
+                  [-2.0] * corridor.w]
+
+        priority = list(map(lambda x: list(map(lambda e: round(e, 2), x)), priority))
+        self.assertListEqual(priority, target)
+
+        coward_prev = (coward.x, coward.y)
+
+        corridor.process_input(Action.MOVE_DOWN)
+        self.assertEqual((coward.x, coward.y), coward_prev)
+
+    def test_passive(self):
+        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        passive = corridor.acting_entities[3]
+
         passive_prev = (passive.x, passive.y)
 
-        self.corridor.process_input(Action.MOVE_DOWN)
-        self.assertEqual((coward.x, coward.y), coward_prev)
-        self.assertEqual((aggressive.x, aggressive.y), (aggressive_prev[0], aggressive_prev[1]))
+        corridor.process_input(Action.MOVE_DOWN)
         self.assertEqual((passive.x, passive.y), passive_prev)
 
-        self.corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        passive_prev = (passive.x, passive.y)
+
+        corridor.process_input(Action.MOVE_DOWN)
+        self.assertEqual((passive.x, passive.y), passive_prev)
 
 
 if __name__ == '__main__':

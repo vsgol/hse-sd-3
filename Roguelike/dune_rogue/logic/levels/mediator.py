@@ -20,18 +20,17 @@ class LevelMediator:
         """
         return self.level.static_entities, self.level.acting_entities
 
-    def get_entity_at(self, x, y):
+    def get_entity_at(self, coord):
         """Returns entity at given coordinates
-        :param x: x coordinate
-        :param y: y coordinate
+        :param coord: coordinate
         :return:
         """
-        if not (0 <= x < self.level.w) or not (0 <= y < self.level.h):
+        if not self.inside_level(coord):
             return None
         for ent in self.level.acting_entities:
-            if ent.x == x and ent.y == y:
+            if ent.coord == coord:
                 return ent
-        return self.level.static_entities[y][x]
+        return self.level.static_entities[coord.y][coord.x]
 
     def add_entity(self, entity):
         """Add new entity to the level
@@ -39,3 +38,10 @@ class LevelMediator:
         """
         self.new_entities.append(entity)
         self.new_coords[entity.y][entity.x] = True
+
+    def inside_level(self, coord):
+        """Checks if coordinate is inside level
+        :param coord: coordinate
+        :return: whether inside level or not
+        """
+        return self.level.w > coord.x >= 0 and self.level.h > coord.y >= 0

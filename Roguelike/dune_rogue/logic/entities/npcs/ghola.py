@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from dune_rogue.logic.ai.passive import PassiveBehavior
+from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.npcs.npc import Replicating
 from dune_rogue.logic.stats import CharacterStats
 from dune_rogue.render.color import Color
@@ -23,45 +24,42 @@ class Ghola(Replicating):
             x = 1
         elif x == 0:
             x = mediator.level.w - 2
-        return x, y
+        return Coordinate(x, y)
 
     @staticmethod
-    def get_neighbors_count(ex, ey, mediator):
+    def get_neighbors_count(e_coord, mediator):
         cnt = 0
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]:
-            x = ex + dx
-            y = ey + dy
-            x, y = Ghola.scale_coords(x, y, mediator)
+            coord = e_coord + Coordinate(dx, dy)
+            coord = Ghola.scale_coords(coord.x, coord.y, mediator)
 
-            ent_at = mediator.get_entity_at(x, y)
+            ent_at = mediator.get_entity_at(coord)
             if ent_at is not None and isinstance(ent_at, Ghola):
                 cnt += 1
         return cnt
 
     def clone(self, mediator):
-        ex = self.x
-        ey = self.y
+        e_coord = self.coord
 
         for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]:
-            x = ex + dx
-            y = ey + dy
-            x, y = Ghola.scale_coords(x, y, mediator)
+            coord = e_coord + Coordinate(dx, dy)
 
-            ent_at = mediator.get_entity_at(x, y)
-            if ent_at is None or ent_at.is_solid or mediator.new_coords[y][x]:
+            coord = Ghola.scale_coords(coord.x, coord.y, mediator)
+
+            ent_at = mediator.get_entity_at(coord)
+            if ent_at is None or ent_at.is_solid or mediator.new_coords[coord.y][coord.x]:
                 continue
 
-            nbs = self.get_neighbors_count(x, y, mediator)
+            nbs = self.get_neighbors_count(coord, mediator)
             if nbs == 3:
                 clone = deepcopy(self)
-                clone.x = x
-                clone.y = y
+                clone.coord = coord
                 mediator.add_entity(clone)
 
     def update(self, mediator):
         self.behavior.move(self, mediator)
         self.clone(mediator)
-        nbs = self.get_neighbors_count(self.x, self.y, mediator)
+        nbs = self.get_neighbors_count(self.coord, mediator)
         if not (2 <= nbs <= 3):
             self.exp = 0
             self.is_alive = False
