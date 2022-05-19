@@ -3,19 +3,20 @@ from collections import deque
 
 from dune_rogue.logic.ai.behavior import Behavior
 from dune_rogue.logic.ai.random import RandomBehavior
+from dune_rogue.logic.coordinate import Coordinate
 
 
 class AggressiveBehavior(Behavior):
     """Entity seeks for player to attack if player near enough"""
-    def __init__(self, radius=25):
+    def __init__(self, radius=5):
         """
         :param radius: radius in which entity will chase player
         """
         super().__init__()
-        self.radius = radius
+        self.radius_sq = radius ** 2
 
     @staticmethod
-    def build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator):
+    def build_priority(w, h, player_coord, entity_coord, mediator):
         """ Assigns priority to all positions where player is the best target and value decreases exponentially
         with distance increase
         :argument w: level width
@@ -28,9 +29,9 @@ class AggressiveBehavior(Behavior):
         """
         priority = [[-2.0] * w for _ in range(h)]
         visited = [[False] * w for _ in range(h)]
-        priority[y_player][x_player] = 1.0
-        priority[y_entity][x_entity] = -1.0
-        visited[y_player][x_player] = True
+        priority[player_coord.y][player_coord.x] = 1.0
+        priority[entity_coord.y][entity_coord.x] = -1.0
+        visited[player_coord.y][player_coord.x] = True
         discount = 0.99
         reached_entity = False
 
@@ -41,53 +42,57 @@ class AggressiveBehavior(Behavior):
                     visited[ent.y][ent.x] = True
 
         queue = deque()
-        queue.append((x_player, y_player))
+        queue.append(player_coord)
+
         while len(queue) > 0:
-            x, y = queue.popleft()
+            coord = queue.popleft()
 
             for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                x_new = x + dx
-                y_new = y + dy
-                if x_new >= w or x_new < 0 or y_new >= h or y_new < 0 or visited[y_new][x_new]:
+                new = coord + Coordinate(dx, dy)
+                if not mediator.inside_level(new) or visited[new.y][new.x]:
                     continue
-                priority[y_new][x_new] = priority[y][x] * discount
-                visited[y][x] = True
-                if y_new == y_entity and x_new == x_entity:
+                priority[new.y][new.x] = priority[coord.y][coord.x] * discount
+                visited[coord.y][coord.x] = True
+                if new == entity_coord:
                     reached_entity = True
                 if not reached_entity:
-                    queue.append((x_new, y_new))
+                    queue.append(new)
 
         return priority
 
+    def within_perception(self, player_coord, entity_coord):
+        diff = player_coord - entity_coord
+        return diff.x ** 2 + diff.y ** 2 < self.radius_sq + 0.5
+
     def move(self, entity, mediator):
-        x_player = mediator.level.player.x
-        y_player = mediator.level.player.y
-        x_entity = entity.x
-        y_entity = entity.y
+        player_coord = mediator.level.player.coord
+        entity_coord = entity.coord
         w, h = mediator.get_level_shape()
 
-        if (x_player - x_entity) ** 2 + (y_player - y_entity) ** 2 >= self.radius + 0.5:
+        if not self.within_perception(player_coord, entity_coord):
             RandomBehavior().move(entity, mediator)
             return
 
-        priority = self.build_priority(w, h, x_player, y_player, x_entity, y_entity, mediator)
+        priority = self.build_priority(w, h, player_coord, entity_coord, mediator)
         max_p = -1
         candidates = []
         for (dx, dy) in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            x, y, = x_entity + dx, y_entity + dy
-            if w > x >= 0 and h > y >= 0:
-                p = priority[y][x]
-                if max_p <= p and (x == x_entity and abs(y - y_entity) <= 1 or y == y_entity and abs(x - x_entity) <= 1):
-                    if max_p == p:
-                        candidates.append((x, y))
-                    else:
-                        max_p = p
-                        candidates = [(x, y)]
+            coord = entity_coord + Coordinate(dx, dy)
+            if not mediator.inside_level(coord):
+                continue
+            p = priority[coord.y][coord.x]
+            if not (max_p <= p and self.acceptable_position(coord, entity_coord)):
+                continue
+            if max_p == p:
+                candidates.append(coord)
+            else:
+                max_p = p
+                candidates = [coord]
 
-        new_x, new_y = random.choice(candidates)
-        if (new_x != x_player or new_y != y_player) and mediator.get_entity_at(new_x, new_y).is_solid:
-            new_x, new_y = x_entity, y_entity
-        self.move_to_cell(entity, mediator, new_x, new_y)
+        new = random.choice(candidates)
+        if not (new == player_coord) and mediator.get_entity_at(new).is_solid:
+            new = entity_coord
+        self.move_to_cell(entity, mediator, new)
 
 
 if __name__ == '__main__':

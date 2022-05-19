@@ -2,6 +2,7 @@ import os
 import unittest
 from pathlib import Path
 
+from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.levels.level import Level
 
@@ -22,7 +23,7 @@ class LevelTest(unittest.TestCase):
             self.assertEqual(len(st_ent_row), 4)
         self.assertEqual(len(level_1.acting_entities), 1)
         self.assertFalse(level_1.is_finished)
-        self.assertEqual(level_1.finish_coord, (2, 2))
+        self.assertEqual(level_1.finish_coord, Coordinate(2, 2))
         self.assertEqual((LevelTest.player.x, LevelTest.player.y), (1, 1))
 
     def test_finish(self):
