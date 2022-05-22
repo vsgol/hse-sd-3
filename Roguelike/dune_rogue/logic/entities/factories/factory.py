@@ -1,3 +1,5 @@
+from abc import ABC
+
 from dune_rogue.logic.entities.items.healing_potion_entity import HealingPotionEntity
 from dune_rogue.logic.entities.items.unfixed_crysknife_entity import UnfixedCrysknifeEntity
 from dune_rogue.logic.entities.items.worn_stillsuit_entity import WornStillsuitEntity
@@ -7,7 +9,7 @@ from dune_rogue.logic.entities.static_entities import WallEntity, FloorEntity, L
 from dune_rogue.logic.items.usable.healing_potion import HealingPotion
 
 
-class EntityFactory:
+class EntityFactory(ABC):
     """Entities factory"""
     @staticmethod
     def create_player_character(x, y):
@@ -55,7 +57,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized cielago entity
         """
-        raise NotImplementedError('aggressive creation is not implemented')
+        assert False
 
     @staticmethod
     def create_coward(x, y):
@@ -64,7 +66,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized kangaroo mouse entity
         """
-        raise NotImplementedError('coward creation is not implemented')
+        assert False
 
     @staticmethod
     def create_passive(x, y):
@@ -73,7 +75,7 @@ class EntityFactory:
         :argument y: Entity y coordinate
         :return: Initialized kit fox entity
         """
-        raise NotImplementedError('passive creation is not implemented')
+        assert False
 
     @staticmethod
     def create_unfixed_crys(x, y):

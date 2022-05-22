@@ -3,7 +3,7 @@ from abc import ABC
 from dune_rogue.logic.actions import Action
 from dune_rogue.render.menus.menu import Menu
 
-from dune_rogue.render.color import Color, WHITE_COLOR
+from dune_rogue.render.color import Color, WHITE_COLOR, TITLE_COLOR
 
 
 class SimpleMenu(Menu, ABC):
@@ -20,7 +20,7 @@ class SimpleMenu(Menu, ABC):
         self.selected_option = 0
 
     def render(self):
-        title_colors = [[Color(249, 213, 162)] * len(self.title)]
+        title_colors = [[TITLE_COLOR] * len(self.title)]
 
         options = list(map(lambda o: f' {o[0]}', self.options))
         options[self.selected_option] = '>>' + options[self.selected_option]

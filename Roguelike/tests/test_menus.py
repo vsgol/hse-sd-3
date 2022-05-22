@@ -9,6 +9,7 @@ from dune_rogue.logic.entities.acting_entity import ActingEntity
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.items.item import InventoryItem
 from dune_rogue.logic.levels.level import Level
+from dune_rogue.logic.levels.loader import LevelLoader
 from dune_rogue.logic.states import State
 from dune_rogue.logic.stats import Stats
 from dune_rogue.render.menus.error_message import ErrorMsg
@@ -115,7 +116,8 @@ class MenusTest(unittest.TestCase):
         cwd = os.path.realpath(__file__)
         path = Path(cwd)
         levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
-        level = Level(levels_dir + 'level_1.lvl', player)
+        loader = LevelLoader()
+        level = loader.load_from_file(levels_dir + 'level_1.lvl', player)
         n_items = 10
         menu = InventoryMenu(player, level)
 

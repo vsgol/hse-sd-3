@@ -10,6 +10,7 @@ from dune_rogue.render.glyph import Glyph
 
 class Ghola(Replicating):
     """Ghola passive enemy"""
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]
     def __init__(self, x, y):
         super().__init__(x, y, Glyph('G', Color(229, 194, 152)), PassiveBehavior(), 3, 1,
                          stats=CharacterStats(2, 0, 1, 2))
@@ -29,7 +30,7 @@ class Ghola(Replicating):
     @staticmethod
     def get_neighbors_count(e_coord, mediator):
         cnt = 0
-        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]:
+        for dx, dy in Ghola.directions:
             coord = e_coord + Coordinate(dx, dy)
             coord = Ghola.scale_coords(coord.x, coord.y, mediator)
 
@@ -41,7 +42,7 @@ class Ghola(Replicating):
     def clone(self, mediator):
         e_coord = self.coord
 
-        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]:
+        for dx, dy in Ghola.directions:
             coord = e_coord + Coordinate(dx, dy)
 
             coord = Ghola.scale_coords(coord.x, coord.y, mediator)

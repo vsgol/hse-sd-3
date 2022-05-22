@@ -8,24 +8,15 @@ from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.items.item_entity import ItemEntity
 from dune_rogue.logic.entities.npcs.npc import Enemy, NPC
 from dune_rogue.logic.levels.mediator import LevelMediator
-from dune_rogue.render.color import WHITE_COLOR, Color
+from dune_rogue.render.color import WHITE_COLOR, Color, GREY_COLOR
 from dune_rogue.render.scene import Scene
 from dune_rogue.logic.actions import Action
 from dune_rogue.logic.states import State
 
 
-_MIN_ROOM_SIZE = 4
-_MAX_ROOM_SIZE = 10
-_MIN_ROOMS = 5
-_MAX_ROOMS = 10
-_MAX_ENTITIES = 15
-_MIN_ENTITIES = 4
-_MAX_ITEMS = 3
-_GEN_ITERS = 10
-
-
 class Level(Scene):
     """Level class"""
+    # Matrix for lighting, see http://www.roguebasin.com/index.php/Python_shadowcasting_implementation
     mult = [
         [1, 0, 0, -1, -1, 0, 0, 1],
         [0, 1, -1, 0, 0, -1, 1, 0],
@@ -33,9 +24,8 @@ class Level(Scene):
         [1, 0, 0, 1, -1, 0, 0, -1]
     ]
 
-    def __init__(self, load_file, player):
+    def __init__(self, player):
         """
-        :param load_file: file to load level from
         :param player: player character entity
         """
         self.w = 0
@@ -49,18 +39,14 @@ class Level(Scene):
         self.visible = []
         self.light = False
 
-        self._STATIC_ENTITY_MAPPING = {}
-        self._ACTING_ENTITY_MAPPING = {}
+        self.static_entity_mapping = {}
+        self.acting_entity_mapping = {}
         self.factory = None
-
-        if load_file:
-            self.load_from_file(load_file)
-
 
     def render(self):
         self.update_visibility()
         text = list(map(lambda ents: list(map(str, ents)), self.static_entities))
-        colors = [[Color(50, 50, 50)] * self.w for _ in range(self.h)]
+        colors = [[GREY_COLOR] * self.w for _ in range(self.h)]
         solid = [[False] * self.w for _ in range(self.h)]
         for i in range(self.h):
             for j in range(self.w):
@@ -145,13 +131,13 @@ class Level(Scene):
 
     def set_factory(self, factory):
         self.factory = factory
-        self._STATIC_ENTITY_MAPPING = {
+        self.static_entity_mapping = {
             '#': factory.create_wall,
             ' ': factory.create_floor,
             'X': factory.create_finish,
         }
 
-        self._ACTING_ENTITY_MAPPING = {
+        self.acting_entity_mapping = {
             'a': factory.create_aggressive,
             'c': factory.create_coward,
             'p': factory.create_passive,
@@ -160,179 +146,6 @@ class Level(Scene):
             '&': factory.create_worn_stillsuit,
             # '@': EntityFactory.create_player_character
         }
-
-    def load_from_file(self, file_name):
-        """Loads level from file
-        :argument file_name: file to load from
-        """
-        with open(file_name, 'r') as file:
-            factory_type = file.readline().strip()
-
-            if factory_type == 'animals':
-                self.set_factory(AnimalsFactory())
-            elif factory_type == 'machines':
-                self.set_factory(MachinesFactory())
-            else:
-                raise ValueError(f'Unknown level type {factory_type}')
-
-            w, h = map(int, file.readline().split())
-            self.w, self.h = w, h
-            self.static_entities = []
-            self.acting_entities = []
-
-            for i in range(h):
-                ent_row = []
-                ent_symbols = file.readline()
-                for j in range(w):
-                    ent_row.append(self._STATIC_ENTITY_MAPPING[ent_symbols[j]](j, i))
-                    if ent_symbols[j] == 'X':
-                        self.finish_coord = Coordinate(j, i)
-                self.static_entities.append(ent_row)
-                self.explored.append([False] * w)
-
-
-            n_acting = int(file.readline())
-
-            for _ in range(n_acting):
-                ent_symbol, x, y = file.readline().split()
-                x, y = int(x), int(y)
-                if ent_symbol == '@':
-                    self.player.x = x
-                    self.player.y = y
-                    self.acting_entities.append(self.player)
-                else:
-                    self.acting_entities.append(self._ACTING_ENTITY_MAPPING[ent_symbol](x, y))
-
-    class Room:
-        def __init__(self, x, y, w, h):
-            self.x = x
-            self.y = y
-            self.w = w
-            self.h = h
-
-    def generate(self, w, h, factory):
-        """Generates random level
-        :argument w: width
-        :argument h: height
-        :argument factory: entities factory
-        """
-        self.set_factory(factory)
-
-        self.static_entities = [['#'] * w for _ in range(h)]
-        self.acting_entities = []
-        self.w = w
-        self.h = h
-        rooms = []
-        self.explored = [[False] * w for _ in range(h)]
-
-        total_rooms = randrange(_MIN_ROOMS, _MAX_ROOMS)
-        for i in range(_GEN_ITERS):
-            for r in range(total_rooms):
-                if len(rooms) >= _MAX_ROOMS:
-                    break
-
-                width = randrange(_MIN_ROOM_SIZE, _MAX_ROOM_SIZE)
-                height = randrange(_MIN_ROOM_SIZE, _MAX_ROOM_SIZE)
-                if w - width - 1 < 2 or h - height - 1 < 2:
-                    continue
-                x = randrange(1, w - width - 1)
-                y = randrange(1, h - height - 1)
-
-                room = self.Room(x, y, width, height)
-
-                def check_overlap(room, rooms):
-                    for other in rooms:
-                        if (room.x <= other.x + other.w and room.x + room.w >= other.x) and\
-                                (room.y <= other.y + other.h and room.y + room.h >= other.y):
-                            return True
-                    return False
-
-                if check_overlap(room, rooms):
-                    pass
-                else:
-                    rooms.append(room)
-        for room in rooms:
-            for y in range(room.y, room.y + room.h):
-                for x in range(room.x, room.x + room.w):
-                    self.static_entities[y][x] = ' '
-
-        shuffle(rooms)
-        for i in range(len(rooms) - 1):
-            r1 = rooms[i]
-            r2 = rooms[i + 1]
-
-            for x in range(r1.x, r2.x + 1):
-                self.static_entities[r1.y][x] = ' '
-            for y in range(r1.y, r2.y + 1):
-                self.static_entities[y][r1.x] = ' '
-            for x in range(r2.x, r1.x + 1):
-                self.static_entities[r1.y][x] = ' '
-            for y in range(r2.y, r1.y + 1):
-                self.static_entities[y][r1.x] = ' '
-            for x in range(r1.x, r2.x + 1):
-                self.static_entities[r2.y][x] = ' '
-            for y in range(r1.y, r2.y + 1):
-                self.static_entities[y][r2.x] = ' '
-            for x in range(r2.x, r1.x + 1):
-                self.static_entities[r2.y][x] = ' '
-            for y in range(r2.y, r1.y + 1):
-                self.static_entities[y][r2.x] = ' '
-
-        for i in range(h):
-            for j in range(w):
-                self.static_entities[i][j] = self._STATIC_ENTITY_MAPPING[self.static_entities[i][j]](j, i)
-
-        def get_random_pos():
-            rnd_room = rooms[randrange(0, len(rooms))]
-            x_pos = randrange(0, rnd_room.w) + rnd_room.x
-            y_pos = randrange(0, rnd_room.h) + rnd_room.y
-            return Coordinate(x_pos, y_pos)
-
-        finish_pos = get_random_pos()
-        self.finish_coord = finish_pos
-        self.static_entities[finish_pos.y][finish_pos.x] = self._STATIC_ENTITY_MAPPING['X'](finish_pos.x, finish_pos.y)
-
-        pos = get_random_pos()
-        while pos == finish_pos:
-            pos = get_random_pos()
-
-        self.player.coord = pos
-        self.acting_entities.append(self.player)
-
-        mediator = LevelMediator(self)
-        n_entities = randrange(_MIN_ENTITIES, _MAX_ENTITIES)
-        n_items = 0
-
-        for _ in range(_GEN_ITERS):
-            for _ in range(n_entities):
-                if len(self.acting_entities) >= n_entities + 1:
-                    break
-
-                pos = get_random_pos()
-                old_ent = mediator.get_entity_at(pos)
-                if old_ent.is_solid:
-                    continue
-
-                symb = random.choice(list(self._ACTING_ENTITY_MAPPING.keys()))
-                ent = self._ACTING_ENTITY_MAPPING[symb](pos.x, pos.y)
-                if symb == 'r':
-                    for i in range(randrange(2, 4)):
-                        for j in range(randrange(2, 4)):
-                            for dx in range(-i, i + 1):
-                                for dy in range(-j, j + 1):
-                                    ex = pos.x + dx
-                                    ey = pos.y + dy
-                                    if ex >= self.w or ey >= self.h or self.static_entities[ey][ex].is_solid or random.random() < 0.5:
-                                        continue
-                                    c_ent = self._ACTING_ENTITY_MAPPING[symb](ex, ey)
-                                    self.acting_entities.append(c_ent)
-                                    n_entities += 1
-
-                if isinstance(ent, ItemEntity):
-                    if n_items >= _MAX_ITEMS:
-                        continue
-                    n_items += 1
-                self.acting_entities.append(ent)
 
     ### Lighting code is from here http://www.roguebasin.com/index.php/Python_shadowcasting_implementation
     def blocked(self, x, y):
