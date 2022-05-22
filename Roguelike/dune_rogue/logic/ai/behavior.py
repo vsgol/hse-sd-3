@@ -6,26 +6,28 @@ from dune_rogue.logic.coordinate import Coordinate
 
 class Behavior(ABC):
     """NPC behavior basic class"""
-    def __init__(self, previous=None):
+
+    def __init__(self, initial_state):
         """
-        :param previous: previous behavior
+        :param initial_state: initial state
         """
-        self.previous = previous
         self.radius_sq = float('inf')
+        self.current_state = initial_state
 
     def move(self, entity, mediator):
-        """ Make decision
+        """ Make decision based on the current state
         :argument entity: game entity with this behavior
         :argument mediator: level mediator
         """
-        raise NotImplementedError('move method is not implemented')
+        self.current_state.update_state(entity)
+        self.current_state.move(entity, mediator)
 
-    def new_behavior(self, entity):
-        """ Change behavior based on entity state
-        :argument entity: entity to process
-        :return: new behavior
+    def act(self, entity, mediator):
+        """ Make default decision
+        :argument entity: game entity with this behavior
+        :argument mediator: level mediator
         """
-        return self
+        assert False  # move is not implemented
 
     @staticmethod
     def move_to_cell(entity, mediator, new_coord):
@@ -56,10 +58,8 @@ def build_priority(w, h, player_coord, entity_coord, mediator):
     with distance increase
     :argument w: level width
     :argument h: level height
-    :argument x_player: player x coordinate
-    :argument y_player: player y coordinate
-    :argument x_entity: entity x coordinate
-    :argument y_entity: entity y coordinate
+    :argument player_coord: player coordinate
+    :argument entity_coord: entity coordinate
     :argument mediator: level mediator
     """
     priority = [[-2.0] * w for _ in range(h)]

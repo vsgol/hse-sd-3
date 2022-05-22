@@ -22,7 +22,6 @@ class NPC(CharacterEntity, ABC):
 
     def update(self, mediator):
         self.behavior.move(self, mediator)
-        self.behavior = self.behavior.new_behavior(self)
 
 
 class Enemy(NPC, ABC):

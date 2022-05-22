@@ -1,27 +1,23 @@
 import random
 from dune_rogue.logic.ai.behavior import Behavior, build_priority
-from dune_rogue.logic.ai.random import RandomBehavior
+from dune_rogue.logic.ai.random import RandomBehavior, random_position
 from dune_rogue.logic.coordinate import Coordinate
 
 
 class CowardBehavior(Behavior):
     """Entity escapes for player when player near enough"""
-    def __init__(self, radius=5, previous=None):
+    def __init__(self, initial_state, radius=5):
         self.radius_sq = radius ** 5
-        super().__init__(previous)
+        super().__init__(initial_state)
 
-    def new_behavior(self, entity):
-        if self.previous and 3 * entity.stats.hp > entity.stats.max_hp:
-            return self.previous
-        return self
-
-    def move(self, entity, mediator):
+    def act(self, entity, mediator):
         player_coord = mediator.level.player.coord
         entity_coord = entity.coord
         w, h = mediator.get_level_shape()
 
         if not self.within_perception(player_coord, entity_coord):
-            RandomBehavior().move(entity, mediator)
+            new = random_position(entity, mediator)
+            self.move_to_cell(entity, mediator, new)
             return
 
         neg_priority = build_priority(w, h, player_coord, entity_coord, mediator)
