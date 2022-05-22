@@ -1,6 +1,6 @@
 from abc import ABC
 
-from dune_rogue.logic.ai.coward import CowardBehavior
+from dune_rogue.logic.ai.coward import CowardBehavior, move_to_coward_position
 
 
 class BehaviorState(ABC):
@@ -21,7 +21,8 @@ class BehaviorState(ABC):
 
 
 class NormalState(BehaviorState):
-    """Normal entity state"""
+    """Normal behavior state"""
+
     def move(self, entity, mediator):
         """ Make decision
         :argument entity: game entity with this state
@@ -38,15 +39,14 @@ class NormalState(BehaviorState):
 
 
 class PanicState(BehaviorState):
-    def __init__(self):
-        self.coward_behavior = CowardBehavior(NormalState())
+    """Panic behavior state"""
 
     def move(self, entity, mediator):
         """ Make decision
         :argument entity: game entity with this state
         :argument mediator: level mediator
         """
-        self.coward_behavior.act(entity, mediator)
+        move_to_coward_position(entity.behavior, entity, mediator)
 
     def update_state(self, entity):
         """ Updates entities behavior
