@@ -229,11 +229,10 @@ class LevelGenerator(LevelBuilder):
                         for j in range(randrange(2, 4)):
                             for dx in range(-i, i + 1):
                                 for dy in range(-j, j + 1):
-                                    ex = pos.x + dx
-                                    ey = pos.y + dy
-                                    if ex >= self.level.w or ey >= self.level.h or self.level.static_entities[ey][ex].is_solid or random.random() < 0.5:
+                                    e_pos = pos + Coordinate(dx, dy)
+                                    if not mediator.inside_level(e_pos) or self.level.static_entities[e_pos.y][e_pos.x].is_solid or random.random() < 0.5:
                                         continue
-                                    c_ent = self.level.acting_entity_mapping[symb](ex, ey)
+                                    c_ent = self.level.acting_entity_mapping[symb](e_pos.x, e_pos.y)
                                     self.level.acting_entities.append(c_ent)
                                     n_entities += 1
 
