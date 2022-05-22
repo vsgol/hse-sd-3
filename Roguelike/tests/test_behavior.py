@@ -6,6 +6,7 @@ from dune_rogue.logic.actions import Action
 from dune_rogue.logic.ai.behavior import build_priority
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.levels.level import Level
+from dune_rogue.logic.levels.loader import LevelLoader
 from dune_rogue.logic.levels.mediator import LevelMediator
 
 
@@ -14,9 +15,10 @@ class BehaviorTest(unittest.TestCase):
     cwd = os.path.realpath(__file__)
     path = Path(cwd)
     levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
+    loader = LevelLoader()
 
     def test_aggressive(self):
-        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        corridor = BehaviorTest.loader.load_from_file(self.levels_dir + 'corridor.lvl', self.player)
         mediator = LevelMediator(corridor)
         aggressive = corridor.acting_entities[2]
 
@@ -52,7 +54,7 @@ class BehaviorTest(unittest.TestCase):
         self.assertEqual((aggressive.x, aggressive.y), (aggressive_prev[0], aggressive_prev[1]))
 
     def test_coward(self):
-        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        corridor = BehaviorTest.loader.load_from_file(self.levels_dir + 'corridor.lvl', self.player)
         mediator = LevelMediator(corridor)
         coward = corridor.acting_entities[1]
 
@@ -85,7 +87,7 @@ class BehaviorTest(unittest.TestCase):
         self.assertEqual((coward.x, coward.y), coward_prev)
 
     def test_passive(self):
-        corridor = Level(self.levels_dir + 'corridor.lvl', self.player)
+        corridor = BehaviorTest.loader.load_from_file(self.levels_dir + 'corridor.lvl', self.player)
         passive = corridor.acting_entities[3]
 
         passive_prev = (passive.x, passive.y)

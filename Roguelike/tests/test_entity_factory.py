@@ -31,13 +31,6 @@ class EntFactoryTest(unittest.TestCase):
         self.assertTrue(isinstance(ent, LevelFinishEntity))
         self.assertEqual((ent.x, ent.y), (1, 2))
 
-        with self.assertRaises(NotImplementedError):
-            factory.create_passive(1, 2)
-        with self.assertRaises(NotImplementedError):
-            factory.create_coward(1, 2)
-        with self.assertRaises(NotImplementedError):
-            factory.create_aggressive(1, 2)
-
         ent = factory.create_unfixed_crys(1, 2)
         self.assertTrue(isinstance(ent, UnfixedCrysknifeEntity))
         self.assertEqual((ent.x, ent.y), (1, 2))

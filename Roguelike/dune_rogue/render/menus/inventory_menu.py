@@ -6,8 +6,7 @@ from dune_rogue.logic.items.weapons.unfixed_crysknife import UnfixedCrysknife
 from dune_rogue.logic.states import State
 from dune_rogue.render.menus.menu import Menu
 
-from dune_rogue.render.color import Color, WHITE_COLOR
-
+from dune_rogue.render.color import Color, WHITE_COLOR, TITLE_COLOR
 
 MAX_DESCR_LINE_LEN = 10
 _ITEM_TO_ENTITY_FUNC = {
@@ -31,7 +30,7 @@ class InventoryMenu(Menu):
         self.selected_option = 0
 
     def render(self):
-        title_colors = [[Color(249, 213, 162)] * len(self.title)]
+        title_colors = [[TITLE_COLOR] * len(self.title)]
 
         if len(self.player.inventory.items) != 0:
             options = list(map(lambda o: f' {o.name}   {"*" if o.is_equipped else " "} ', self.player.inventory.items))

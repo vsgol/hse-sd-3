@@ -103,8 +103,8 @@ class GameControl:
         self.level_loader.set_sizes(randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE),
                                     randrange(_MIN_LEVEL_SIZE, _MAX_LEVEL_SIZE))
         self.level_loader.set_factory(AnimalsFactory() if random() < 0.5 else MachinesFactory())
-        self.level.light = self.vision
         self.level = self.level_loader.build(self.player)
+        self.level.light = self.vision
         self.inventory = InventoryMenu(self.player, self.level)
 
     def load_level(self):
