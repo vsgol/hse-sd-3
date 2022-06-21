@@ -1,9 +1,14 @@
+import argparse
+import io
 import os
+import re
 import subprocess
 from abc import ABC, abstractmethod
+from contextlib import redirect_stderr
 
 SUCCESS_RETURN_CODE = 0
 FAILED_FILE_OPEN_RETURN_CODE = 1
+FAILED_ARG_PARSE_RETURN_CODE = 2
 OTHER_RETURN_CODE = 255
 
 
@@ -352,4 +357,84 @@ class OtherCommand(Command):
             self.stderr = self.stderr.decode(encoding)
 
         self.return_code = out.returncode
+        return self.return_code
+
+
+class GrepCommand(Command):
+    """'grep' command class
+    Attributes:
+        args: arguments to be processed
+        parser: argument parser
+    """
+    def __init__(self, args):
+        """Inits GrepCommand arguments and parser
+        Args:
+            args: contains keys for running grep
+        """
+        super().__init__()
+        self.args = args
+        self.parser = argparse.ArgumentParser(prog='grep')
+        self.parser.add_argument('-w', dest='word', help='search only for complete word', action='store_true')
+        self.parser.add_argument('-i', dest='case_insensitive', help='case-insensitive search', action='store_true')
+        self.parser.add_argument('-A', dest='lines_after', help='how many lines print after the match', default=0)
+
+    def execute(self, inp: str, memory=None):
+        """Finds target substing in file
+        Args:
+            inp: Previous command output, if target file is not provided than seeks target in it
+            memory: environment variables, ignored
+        Returns:
+            Exit code value
+        """
+        self.stdout = ''
+        self.stderr = ''
+
+        try:
+            f = io.StringIO()
+            with redirect_stderr(f):
+                args, remaining = self.parser.parse_known_args(self.args)
+        except:
+            self.stderr = f'Failed to parse grep arguments'
+            self.return_code = FAILED_ARG_PARSE_RETURN_CODE
+            return self.return_code
+
+        try:
+            args.lines_after = int(args.lines_after)
+            if args.lines_after < 0:
+                raise ValueError
+        except ValueError:
+            self.stderr = f'Value for -A argument must be non-negative integer'
+            self.return_code = FAILED_ARG_PARSE_RETURN_CODE
+            return self.return_code
+
+        if len(remaining) == 0:
+            self.stderr = f'Not enough arguments for grep'
+            self.return_code = FAILED_ARG_PARSE_RETURN_CODE
+            return self.return_code
+
+        if len(remaining) == 1:
+            text = inp
+        else:
+            bs, self.stderr, self.return_code = get_file_bytes(remaining[1], 'grep')
+            if self.return_code != SUCCESS_RETURN_CODE:
+                return self.return_code
+            text = bs.decode('utf-8')
+        text = text.replace(os.linesep, '\n')
+        text = text.split('\n')
+        target = remaining[0]
+        if args.word:
+            target = r'\b{}\b'.format(target)
+        result_lines = []
+        n_next = 0
+        pattern = re.compile(target, re.IGNORECASE if args.case_insensitive else 0)
+
+        for line in text:
+            if re.search(pattern, line) is not None:
+                result_lines.append(line)
+                n_next = args.lines_after
+            elif n_next > 0:
+                result_lines.append(line)
+                n_next -= 1
+        self.stdout = '\n'.join(result_lines)
+        self.return_code = SUCCESS_RETURN_CODE
         return self.return_code
