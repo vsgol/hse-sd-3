@@ -9,6 +9,7 @@ class PauseMenu(SimpleMenu):
         super().__init__(options=[
             ('Continue', State.LEVEL),
             ('Save', State.SAVE),
+            ('Switch vision', State.SWITCH_VISION),
             ('Exit', State.MAIN_MENU)
         ], title="Game is paused", menu_state=State.PAUSE_MENU)
 

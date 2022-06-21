@@ -31,6 +31,8 @@ class InputHandler:
             return Action.TOGGLE_INVENTORY
         elif key == ord('m'):
             return Action.TOGGLE_PAUSE
+        elif key == ord('p'):
+            return Action.PICK_PUT
         elif key == 10 or key == 13:
             return Action.SELECT
         return None

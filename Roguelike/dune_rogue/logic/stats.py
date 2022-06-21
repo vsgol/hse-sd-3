@@ -1,41 +1,50 @@
 class Stats:
     """Statistics class"""
-    def __init__(self, hp=0, defence=0, attack=0, max_hp=0):
+    def __init__(self, hp=0, defence=0, attack=0, max_hp=0, regen=0):
         """
         :param hp: current health points
         :param defence: defence strength
         :param attack: attack strength
         :param max_hp: maximal health points number
+        :param regen: regeneration rate
         """
         self.hp = hp
         self.defence = defence
         self.attack = attack
         self.max_hp = max_hp
+        self.regen = regen
 
     def __add__(self, other):
-        return Stats(self.hp + other.hp, self.defence + other.defence, self.attack + other.attack,
-                     self.max_hp + other.max_hp)
+        return Stats(self.hp + other.hp,
+                     self.defence + other.defence,
+                     self.attack + other.attack,
+                     self.max_hp + other.max_hp,
+                     self.regen + other.regen)
 
     def __neg__(self):
-        return Stats(-self.hp, -self.defence, -self.attack, -self.max_hp)
+        return Stats(-self.hp, -self.defence, -self.attack, -self.max_hp, -self.regen)
 
     def __sub__(self, other):
         return self + (-other)
 
     def __repr__(self):
-        return f'hp: {self.hp}, defence: {self.defence}, attack: {self.attack}, max hp: {self.max_hp}'
+        return f'hp: {self.hp}, defence: {self.defence}, attack: {self.attack}, max hp: {self.max_hp}, regeneration: {self.regen}'
+
+    def __eq__(self, other):
+        return self.hp == other.hp and self.attack == other.attack \
+               and self.defence == other.defence and self.max_hp == other.max_hp
 
 
 class CharacterStats(Stats):
     """Character statistics"""
-    def __init__(self, hp=0, defence=0, attack=0, max_hp=0):
+    def __init__(self, hp=0, defence=0, attack=0, max_hp=0, regen=0):
         """
         :param hp: current health points
         :param defence: defence strength
         :param attack: attack strength
         :param max_hp: maximal health points number
         """
-        super().__init__(hp, defence, attack, max_hp)
+        super().__init__(hp, defence, attack, max_hp, regen)
 
     def add_stats(self, bonus):
         """Add bonuses to statistics
@@ -43,6 +52,7 @@ class CharacterStats(Stats):
         """
         s = self + bonus
         self.__dict__.update(s.__dict__)
+        self.hp = min(self.max_hp, self.hp)
 
     def remove_stats(self, bonus):
         """Remove bonuses from statistics

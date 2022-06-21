@@ -1,7 +1,7 @@
 class InventoryItem:
     """Inventory item"""
     def __init__(self, weight=0, usable=False, can_be_equipped=False, stats=None, name="Default name",
-                 description='Default description', is_equipped=False):
+                 description='Default description', is_equipped=False, item_type=None):
         """
         :param weight: weight of the item
         :param usable: flag whether item can be used
@@ -10,6 +10,7 @@ class InventoryItem:
         :param name: item textual name
         :param description: item textual description
         :param is_equipped: flag whether item is currently equipped
+        :param item_type: type of the item (e.g. armor or weapon)
         """
         self.weight = weight
         self.can_be_equipped = can_be_equipped
@@ -18,6 +19,7 @@ class InventoryItem:
         self.name = name
         self.description = description
         self.is_equipped = is_equipped
+        self.item_type = item_type
 
     def get_bonuses(self):
         """ Get item stats effect
@@ -38,3 +40,23 @@ class InventoryItem:
         if not self.is_equipped:
             raise RuntimeError('Unequipping unequipped item')
         self.is_equipped = False
+
+    def get_bonuses_str(self):
+        """Text representation of bonuses by item
+        :return: Text representation on non-zero bonuses
+        """
+        bonuses = []
+
+        for name, bonus in [
+            ('HP: ', self.stats.hp),
+            ('DEF: ', self.stats.defence),
+            ('ATK: ', self.stats.attack),
+            ('MAX_HP: ', self.stats.max_hp),
+        ]:
+            if bonus != 0:
+                if bonus > 0:
+                    name += f'+{bonus}'
+                else:
+                    name += f'{bonus}'
+                bonuses.append(name)
+        return ' '.join(bonuses)

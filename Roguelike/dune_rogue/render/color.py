@@ -12,3 +12,5 @@ class Color:
 
 
 WHITE_COLOR = Color(255, 255, 255)
+GREY_COLOR = Color(50, 50, 50)
+TITLE_COLOR = Color(249, 213, 162)

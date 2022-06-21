@@ -47,6 +47,17 @@ class ItemsTest(unittest.TestCase):
             item.unequip()
         self.assertFalse(item.is_equipped)
 
+    def test_str(self):
+        item = InventoryItem(stats=ItemsTest.stats)
+        self.assertEqual(item.get_bonuses_str(), f'HP: +{item.stats.hp} DEF: +{item.stats.defence} '
+                                                 f'ATK: +{item.stats.attack} MAX_HP: +{item.stats.max_hp}')
+        neg_item = InventoryItem(stats=Stats(-1, -2, -3, -4))
+        self.assertEqual(neg_item.get_bonuses_str(), f'HP: {neg_item.stats.hp} DEF: {neg_item.stats.defence} '
+                                                     f'ATK: {neg_item.stats.attack} MAX_HP: {neg_item.stats.max_hp}')
+        zeros_item = InventoryItem(stats=Stats(-1, 0, -3, 0))
+        self.assertEqual(zeros_item.get_bonuses_str(), f'HP: {zeros_item.stats.hp} '
+                                                     f'ATK: {zeros_item.stats.attack}')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,3 +13,4 @@ class State(Enum):
     EXIT = 8
     ERR = 9
     DUNGEON = 10
+    SWITCH_VISION = 11

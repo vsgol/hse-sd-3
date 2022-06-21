@@ -80,6 +80,11 @@ class StatsTest(unittest.TestCase):
                            StatsTest.ATK2 - StatsTest.ATK1,
                            StatsTest.MHP2 - StatsTest.MHP1)
 
+        self.assertEqual(stats1, stats1)
+        self.assertEqual(stats2, stats2)
+        self.assertNotEqual(stats1, stats2)
+        self.assertNotEqual(stats2, stats1)
+
     def test_player_stats(self):
         stats = PlayerStats(StatsTest.HP1, StatsTest.DEF1, StatsTest.ATK1, StatsTest.MHP1)
         stats.give_exp(1)
