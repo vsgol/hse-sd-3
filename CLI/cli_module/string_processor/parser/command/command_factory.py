@@ -13,7 +13,8 @@ class CommandFactory:
             'echo': EchoCommand,
             'wc': WcCommand,
             'pwd': PwdCommand,
-            'exit': ExitCommand
+            'exit': ExitCommand,
+            'grep': GrepCommand,
         }
 
     def tokens_to_commands(self, command_name, args) -> Command:

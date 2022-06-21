@@ -169,7 +169,7 @@ class TestCommands(unittest.TestCase):
             self.assertEqual(cmd.get_return_code(), SUCCESS_RETURN_CODE)
 
         for i, (fn, content, ans) in enumerate([(fn1, content1, ans1), (fn2, content2, ans2),
-                                           (fn3, content3, ans3), (fn4, content4, ans4)]):
+                                                (fn3, content3, ans3), (fn4, content4, ans4)]):
             self.create_file(fn, content)
             cmd = WcCommand([fn, f'f{i}', f'f{i + 1}'])
 
@@ -251,3 +251,59 @@ class TestCommands(unittest.TestCase):
         self.assertFalse(os.path.exists('new_dir'))
         self.assertEqual(cmd.get_stderr(), '')
         self.assertEqual(cmd.get_return_code(), SUCCESS_RETURN_CODE)
+
+    def test_grep_invalid(self):
+        cmd = GrepCommand([])
+        self.check_commands_common(cmd)
+        self.assertNotEquals(cmd.execute(''), SUCCESS_RETURN_CODE)
+        self.assertNotEquals(cmd.execute('some input'), SUCCESS_RETURN_CODE)
+
+    def test_grep_fail(self):
+        for (args, rc, ans) in [
+            (['-A', '-1', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', '-30', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', 'string', 'minimal', 'file.txt'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Value for -A argument must be non-negative integer'),
+            (['-A', '1'], FAILED_ARG_PARSE_RETURN_CODE,
+             'Not enough arguments for grep'),
+        ]:
+            cmd = GrepCommand(args)
+            self.check_commands_common(cmd)
+            self.check_commands_common(cmd)
+            self.assertEquals(cmd.execute(''), FAILED_ARG_PARSE_RETURN_CODE)
+            self.assertEquals(cmd.get_stderr(), ans)
+
+    def test_grep(self):
+        content = 'Minimal grep syntax\nnew\nThis is another line\n And another one\nis'
+        file = 'file_test.txt'
+        for (args, ans) in [
+            (['Minimal'], 'Minimal grep syntax'),
+            (['Minimal$'], ''),
+            (['^Minimal'], 'Minimal grep syntax'),
+            (['minimal'], ''),
+            (['-i', 'minimal'], 'Minimal grep syntax'),
+            (['-w', 'Minimal'], 'Minimal grep syntax'),
+            (['-w', 'Minim'], ''),
+            (['-A', '1', 'minimal'], ''),
+            (['-A', '1', 'Minimal'], 'Minimal grep syntax\nnew'),
+            (['-A', '0', 'Minimal'], 'Minimal grep syntax'),
+            (['-A', '0', 'i.*'], 'Minimal grep syntax\nThis is another line\nis'),
+            (['-A', '1', 'i.*'], 'Minimal grep syntax\nnew\nThis is another line\n And another one\nis'),
+            (['-A', '3', 'Minimal'], 'Minimal grep syntax\nnew\nThis is another line\n And another one'),
+            (['-A', '4', 'Minimal'], 'Minimal grep syntax\nnew\nThis is another line\n And another one\nis'),
+            (['-A', '1', 'an'], 'This is another line\n And another one\nis'),
+        ]:
+            cmd = GrepCommand(args)
+            self.check_commands_common(cmd)
+            self.assertEquals(cmd.execute(content), SUCCESS_RETURN_CODE)
+            self.assertEquals(cmd.get_stdout(), ans)
+            with open(file, 'w') as f:
+                f.write(content)
+            cmd = GrepCommand(args + [file])
+            self.check_commands_common(cmd)
+            self.assertEquals(cmd.execute(''), SUCCESS_RETURN_CODE)
+            self.assertEquals(cmd.get_stdout(), ans)
+
+        os.remove(file)
