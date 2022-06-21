@@ -1,6 +1,7 @@
 from copy import deepcopy
 
 from dune_rogue.logic.ai.passive import PassiveBehavior
+from dune_rogue.logic.ai.states import NormalState
 from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.npcs.npc import Replicating
 from dune_rogue.logic.stats import CharacterStats
@@ -12,7 +13,7 @@ class Ghola(Replicating):
     """Ghola passive enemy"""
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (1, -1), (-1, 1)]
     def __init__(self, x, y):
-        super().__init__(x, y, Glyph('G', Color(229, 194, 152)), PassiveBehavior(), 3, 1,
+        super().__init__(x, y, Glyph('G', Color(229, 194, 152)), PassiveBehavior(NormalState()), 3, 1,
                          stats=CharacterStats(2, 0, 1, 2))
 
     @staticmethod

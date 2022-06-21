@@ -1,6 +1,7 @@
 from abc import ABC
 
 from dune_rogue.logic.ai.behavior import Behavior
+from dune_rogue.logic.ai.states import NormalState
 
 
 class StatusEffect(Behavior, ABC):
@@ -10,7 +11,7 @@ class StatusEffect(Behavior, ABC):
         :param behavior: behavior to be wrapped
         :param duration: number of updates before effect ends
         """
-        super().__init__()
+        super().__init__(NormalState())
         self.behavior = behavior
         self.duration = duration
 

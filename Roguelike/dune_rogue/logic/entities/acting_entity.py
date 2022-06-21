@@ -43,3 +43,8 @@ class CharacterEntity(ActingEntity, ABC):
 
         if self.stats.hp <= 0:
             self.is_alive = False
+
+    def regen(self):
+        """Regenerate health"""
+        self.stats.hp += self.stats.regen
+        self.stats.hp = min(self.stats.hp, self.stats.max_hp)
