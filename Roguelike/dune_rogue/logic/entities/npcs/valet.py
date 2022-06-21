@@ -6,8 +6,8 @@ from dune_rogue.render.color import Color
 from dune_rogue.render.glyph import Glyph
 
 
-class KangarooMouse(Enemy):
-    """Kangaroo mouse coward enemy"""
+class Valetbot(Enemy):
+    """Valetbot coward enemy"""
     def __init__(self, x, y):
-        super().__init__(x, y, Glyph('m', Color(166, 145, 80)), CowardBehavior(NormalState()), 2,
-                         stats=CharacterStats(4, 0, 1, 4))
+        super().__init__(x, y, Glyph('V', Color(161, 157, 148)), CowardBehavior(NormalState()), 10,
+                         stats=CharacterStats(6, 1, 2, 6))

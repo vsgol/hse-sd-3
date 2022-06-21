@@ -6,8 +6,8 @@ from dune_rogue.render.color import Color
 from dune_rogue.render.glyph import Glyph
 
 
-class Cielago(Enemy):
-    """Cielago aggressive enemy"""
+class Cymek(Enemy):
+    """Cymek aggressive enemy"""
     def __init__(self, x, y):
-        super().__init__(x, y, Glyph('c', Color(131, 67, 51)), AggressiveBehavior(NormalState()), 3,
-                         stats=CharacterStats(4, 1, 1, 4, 0.2))
+        super().__init__(x, y, Glyph('C', Color(196, 202, 206)), AggressiveBehavior(NormalState()), 16,
+                         stats=CharacterStats(6, 2, 2, 6, 0.2))

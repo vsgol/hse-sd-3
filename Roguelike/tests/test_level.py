@@ -5,6 +5,7 @@ from pathlib import Path
 from dune_rogue.logic.coordinate import Coordinate
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.levels.level import Level
+from dune_rogue.logic.levels.loader import LevelLoader
 
 
 class LevelTest(unittest.TestCase):
@@ -12,10 +13,11 @@ class LevelTest(unittest.TestCase):
     cwd = os.path.realpath(__file__)
     path = Path(cwd)
     levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
-    level_1 = Level(levels_dir + 'level_1.lvl', player)
+    loader = LevelLoader()
+    level_1 = loader.load_from_file(levels_dir + 'level_1.lvl', player)
 
     def test_loading(self):
-        level_1 = Level(LevelTest.levels_dir + 'level_1.lvl', LevelTest.player)
+        level_1 = self.loader.load_from_file(self.levels_dir + 'level_1.lvl', self.player)
         self.assertEqual(level_1.w, 4)
         self.assertEqual(level_1.h, 4)
         self.assertEqual(len(level_1.static_entities), 4)

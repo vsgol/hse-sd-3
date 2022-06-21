@@ -6,8 +6,8 @@ from dune_rogue.render.color import Color
 from dune_rogue.render.glyph import Glyph
 
 
-class KitFox(Enemy):
-    """Kit fox passive enemy"""
+class BrainInAJar(Enemy):
+    """Brain in a jar passive enemy"""
     def __init__(self, x, y):
-        super().__init__(x, y, Glyph('f', Color(183, 88, 0)), PassiveBehavior(NormalState()), 3,
-                         stats=CharacterStats(6, 1, 1, 6, 0.2))
+        super().__init__(x, y, Glyph('B', Color(0, 78, 56)), PassiveBehavior(NormalState()), 10,
+                         stats=CharacterStats(6, 2, 1, 6, 0.2))

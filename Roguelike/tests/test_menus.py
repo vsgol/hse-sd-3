@@ -6,10 +6,10 @@ from pathlib import Path
 
 from dune_rogue.logic.actions import Action
 from dune_rogue.logic.entities.acting_entity import ActingEntity
-from dune_rogue.logic.entities.factory import EntityFactory
 from dune_rogue.logic.entities.player_character import PlayerCharacter
 from dune_rogue.logic.items.item import InventoryItem
 from dune_rogue.logic.levels.level import Level
+from dune_rogue.logic.levels.loader import LevelLoader
 from dune_rogue.logic.states import State
 from dune_rogue.logic.stats import Stats
 from dune_rogue.render.menus.error_message import ErrorMsg
@@ -105,6 +105,8 @@ class MenusTest(unittest.TestCase):
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.PAUSE_MENU)
         self.assertEqual(menu.process_input(Action.SELECT), State.SAVE)
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.PAUSE_MENU)
+        self.assertEqual(menu.process_input(Action.SELECT), State.SWITCH_VISION)
+        self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.PAUSE_MENU)
         self.assertEqual(menu.process_input(Action.SELECT), State.MAIN_MENU)
         self.assertEqual(menu.process_input(Action.MOVE_DOWN), State.PAUSE_MENU)
         self.assertEqual(menu.process_input(Action.TOGGLE_PAUSE), State.LEVEL)
@@ -114,14 +116,15 @@ class MenusTest(unittest.TestCase):
         cwd = os.path.realpath(__file__)
         path = Path(cwd)
         levels_dir = str(path.parent.absolute()) + os.sep + 'resources' + os.sep
-        level = Level(levels_dir + 'level_1.lvl', player)
+        loader = LevelLoader()
+        level = loader.load_from_file(levels_dir + 'level_1.lvl', player)
         n_items = 10
         menu = InventoryMenu(player, level)
 
         random.seed(0)
         for _ in range(n_items):
             player.inventory.add_item(
-                InventoryItem(stats=Stats(*[random.randint(-5, 5) for _ in range(4)]), can_be_equipped=True))
+                InventoryItem(stats=Stats(0, random.randint(-5, 5), random.randint(-5, 5), 0), can_be_equipped=True))
 
         class DummyEntity(ActingEntity):
             def update(self, mediator):
