@@ -1,0 +1,57 @@
+@page
+@using logic.Models
+@model web.Pages.TaskDetails
+
+<h1>Details</h1>
+
+<div>
+    <h4>Task</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HwTask.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HwTask.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HwTask.PublicationDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HwTask.PublicationDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HwTask.DeadlineDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.HwTask.DeadlineDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.HwTask.Description)
+        </dt>
+        <dd class="col-sm-10">
+            <span style="white-space: pre-line">@Model.HwTask.Description</span>
+        </dd>
+    </dl>
+    <form asp-action="" method="post" asp-route-id="@Model.HwTask.Id">
+        <div class="row mb-3">
+            <span asp-validation-for="Attempt.Link" class="text-danger"></span>
+            <label class="col-sm-3 col-form-label col-form-label-lg"
+                   asp-for="Attempt.Link">Submission URL</label>
+            <div class="col-sm-4">
+                <input class="form-control form-control-lg"
+                       asp-for="Attempt.Link"/>
+            </div>
+        </div>
+        <div>
+            <span class="text-danger">@Html.ValidationSummary(false)</span>
+        </div>
+        <div class="row mb-3 mx-auto">
+            <div class="col text-center">
+                <button class="btn btn-primary btn-lg" type="submit">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

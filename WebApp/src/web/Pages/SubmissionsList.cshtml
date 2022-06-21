@@ -1,0 +1,35 @@
+@page
+@using logic.Models
+@model web.Pages.SubmissionsList
+
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width" />
+    <title>ListSubmissions</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" />
+</head>
+<body>
+<div class="row mb-3 text-center">
+    <h2 class="col-sm-6">List of tasks</h2>
+</div>
+<table class="table table-striped table-bordered">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Task name</th>
+        <th>Sumbission time</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (Attempt p in Model.Attempts) {
+        <tr>
+            <td><a asp-page="./SubmissionDetails" asp-route-id="@p.Id">@p.Id</a></td>
+            <td><a asp-page="./TaskDetails" asp-route-id="@p.TaskId">@Model.Tasks.FirstOrDefault(m => m.Id == p.TaskId).Name</a></td>
+            <td>@p.SubmissionDate</td>
+        </tr>
+    }
+    </tbody>
+</table>
+</body>
+</html>
