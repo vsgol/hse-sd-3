@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ 03-roguelike-impl, 03-roguelike-impl-2, 03-roguelike-impl-3, 03-roguelike-ent ]
+    branches: [ 03-roguelike-impl, 03-roguelike-impl-2, 03-roguelike-impl-3, 03-roguelike-ent, 02-cli, 02-cli-commands, 02-cli-main-app, 02-cli-full ]
   pull_request:
-    branches: [ 03-roguelike-impl, 03-roguelike-impl-2, 03-roguelike-impl-3, 03-roguelike-ent ]
+    branches: [ 03-roguelike-impl, 03-roguelike-impl-2, 03-roguelike-impl-3, 03-roguelike-ent, 02-cli, 02-cli-commands, 02-cli-main-app, 02-cli-full ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -26,9 +26,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -r Roguelike/requirements.txt
+          python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          cd Roguelike; nose2 tests
+          nose2 Roguelike/tests
+          cd CLI; nose2          
   build_win:
     runs-on: windows-latest
     steps:
@@ -40,9 +42,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -r Roguelike/requirements.txt
+          python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          cd Roguelike; nose2 tests
+          nose2 Roguelike/tests
+          cd CLI; nose2
   build_mac:
     runs-on:  macos-latest
     steps:
@@ -53,7 +57,11 @@ jobs:
           python-version: 3.9.0
       - name: Install dependencies
         run: |
+- name: Install dependencies
+        run: |
           python -m pip install -r Roguelike/requirements.txt
+          python -m pip install -r CLI/requirements.txt
       - name: Run tests
         run: |
-          cd Roguelike; nose2 tests
+          nose2 Roguelike/tests
+          cd CLI; nose2

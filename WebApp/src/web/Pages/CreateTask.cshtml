@@ -1,0 +1,66 @@
+@page
+@model web.Pages.CreateTask
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Task</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.css" />
+</head>
+<body>
+<div class="d-flex justify-content-center"><h4 class="col-sm-5">Creation form</h4></div>
+<form asp-action="" method="post">
+    <div class="row mb-3">
+        <span asp-validation-for="HwTask.Name" class="text-danger"></span>
+        <label class="col-sm-3 col-form-label col-form-label-lg"
+               asp-for="HwTask.Name">Task name</label>
+        
+        <div class="col-sm-4">
+            <input class="form-control form-control-lg"
+                   asp-for="HwTask.Name" />
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <span asp-validation-for="HwTask.PublicationDate" class="text-danger"></span>
+        <label class="col-sm-3 col-form-label col-form-label-lg">
+            Publication date</label>
+        
+        <div class="col-sm-4">
+            <input asp-for="HwTask.PublicationDate" class="form-control" />
+        </div>
+    </div>
+    <div class="row mb-3">
+        <span asp-validation-for="HwTask.DeadlineDate" class="text-danger"></span>
+        <label class="col-sm-3 col-form-label col-form-label-lg">
+            Deadline date</label>
+        
+        <div class="col-sm-4">
+            <input asp-for="HwTask.DeadlineDate" class="form-control" />
+        </div>
+    </div>
+    <div class="row mb-3">
+            <span asp-validation-for="HwTask.Description" class="text-danger"></span>
+            <label class="col-sm-3 col-form-label col-form-label-lg"
+                   asp-for="HwTask.Description">Task description</label>
+            
+            @* <div class="col-sm-4"> *@
+            @*     <input class="form-control form-control-lg" *@
+            @*            asp-for="NewTask.Description" /> *@
+            @* </div> *@
+            @Html.TextAreaFor(model => model.HwTask.Description, new { rows = "10", cols = "56", @class = "form-control" })
+    </div>
+    <div>
+        <span class="text-danger">@Html.ValidationSummary(false)</span>
+    </div>
+    <div class="row mb-3 mx-auto">
+        <div class="col text-center">
+            <button class="btn btn-primary btn-lg" type="submit">
+                Create
+            </button>
+        </div>
+    </div>
+</form>
+</body>
+</html>
